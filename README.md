@@ -53,6 +53,27 @@ Mit installiertem [Inno Setup 6](https://jrsoftware.org/isdl.php):
 
 Der fertige Installer liegt unter `release\installer`.
 
+### Automatischer Build auf GitHub
+
+Der Workflow `.github/workflows/build-installer.yml` erstellt den
+Windows-Installer automatisch:
+
+- bei Änderungen auf `main`,
+- manuell über **Actions → Build Windows installer → Run workflow**,
+- beim Push eines Versionstags wie `v1.1.0`.
+
+Bei einem normalen Build kann die Setup-EXE auf der Seite des Workflow-Laufs
+unter **Artifacts** heruntergeladen werden. Ein Versionstag erzeugt zusätzlich
+automatisch ein GitHub-Prerelease und hängt die Setup-EXE inklusive
+SHA-256-Prüfsumme an.
+
+Beispiel für eine Veröffentlichung über GitHub Desktop:
+
+1. Änderungen committen und pushen.
+2. In GitHub Desktop **Repository → Open in Terminal** öffnen.
+3. `git tag v1.1.0` ausführen.
+4. `git push origin v1.1.0` ausführen.
+
 Während der Installation:
 
 - wird die aktuelle offizielle ClamAV-Windows-Engine von
