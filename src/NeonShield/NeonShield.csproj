@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <AssemblyName>NeonShield</AssemblyName>
+    <RootNamespace>NeonShield</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Authors>Yiertex</Authors>
+    <Company>Yiertex</Company>
+    <Product>NeonShield Antivirus</Product>
+    <AssemblyTitle>NeonShield Antivirus</AssemblyTitle>
+    <Copyright>Copyright (C) 2026 Yiertex</Copyright>
+    <Description>NeonShield Antivirus mit ClamAV-Engine, Tiefenscan und Quarantaene.</Description>
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**</DefaultItemExcludes>
+  </PropertyGroup>
+
+</Project>

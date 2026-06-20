@@ -1,0 +1,646 @@
+<Window x:Class="NeonShield.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="NeonShield"
+        Width="1280" Height="820" MinWidth="1120" MinHeight="720"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        WindowStartupLocation="CenterScreen">
+    <Border Background="{StaticResource BackgroundBrush}" CornerRadius="18" BorderBrush="#453052" BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="35" ShadowDepth="10" Opacity="0.75"/>
+        </Border.Effect>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="232"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="54"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.ColumnSpan="2" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                <Border Background="#0E0916" CornerRadius="18,18,0,0"/>
+                <StackPanel Orientation="Horizontal" Margin="22,0,0,0" VerticalAlignment="Center">
+                    <Border Width="12" Height="12" CornerRadius="6" Background="{StaticResource NeonGradient}" Effect="{StaticResource NeonShadow}"/>
+                    <TextBlock Text="N E O N S H I E L D" Foreground="White" FontSize="12" FontWeight="Bold" Margin="10,0,0,0"/>
+                    <TextBlock Text="  /  SECURITY CONSOLE" Foreground="#675D70" FontSize="11" Margin="6,0,0,0"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource WindowButton}" Content="—" Click="Minimize_Click"/>
+                    <Button Style="{StaticResource WindowButton}" Content="□" Click="Maximize_Click"/>
+                    <Button Style="{StaticResource WindowButton}" Content="×" Click="Close_Click"/>
+                </StackPanel>
+            </Grid>
+
+            <Border Grid.Row="1" Background="#0E0916" CornerRadius="0,0,0,18" BorderBrush="#2B1D35" BorderThickness="0,1,1,0">
+                <Grid Margin="18,24,18,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel>
+                        <Grid Height="82">
+                            <Ellipse Width="66" Height="66" Fill="#24142F" Stroke="#8038A9" StrokeThickness="1.5" Effect="{StaticResource NeonShadow}"/>
+                            <Path Width="32" Height="38" Fill="{StaticResource NeonGradient}" Stretch="Uniform"
+                                  Data="M12,2 L22,6 L22,15 C22,22 18,27 12,30 C6,27 2,22 2,15 L2,6 Z M11,9 L11,19 L7,15 L5,17 L12,24 L20,13 L17,11 L13,17 L13,9 Z"/>
+                        </Grid>
+                        <TextBlock Text="NEONSHIELD" Foreground="White" FontWeight="Bold" FontSize="17" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        <TextBlock Text="by Yiertex · powered by ClamAV" Foreground="#716779" FontSize="11" HorizontalAlignment="Center" Margin="0,4,0,18"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1">
+                        <Button x:Name="DashboardNav" Style="{StaticResource NavButton}" Tag="Active" Click="DashboardNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="◈" FontSize="18" Width="32"/>
+                                <TextBlock Text="Übersicht" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ScanNav" Style="{StaticResource NavButton}" Click="ScanNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⌁" FontSize="20" Width="32"/>
+                                <TextBlock Text="Scanner" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ReportsNav" Style="{StaticResource NavButton}" Click="ReportsNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="≡" FontSize="20" Width="32"/>
+                                <TextBlock Text="Scanberichte" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="QuarantineNav" Style="{StaticResource NavButton}" Click="QuarantineNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="▣" FontSize="17" Width="32"/>
+                                <TextBlock Text="Quarantäne" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="SettingsNav" Style="{StaticResource NavButton}" Click="SettingsNav_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙" FontSize="17" Width="32"/>
+                                <TextBlock Text="Einstellungen" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <Border Grid.Row="2" Background="#171020" BorderBrush="#34243E" BorderThickness="1" CornerRadius="14" Padding="14">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Ellipse x:Name="EngineDot" Width="9" Height="9" Fill="#FF6A8D" VerticalAlignment="Top" Margin="0,5,10,0"/>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock x:Name="EngineStatusText" Text="Engine nicht verbunden" Foreground="White" FontSize="11" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                <TextBlock x:Name="EngineVersionText" Text="ClamAV auswählen" Foreground="#776C7E" FontSize="10" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Grid.Column="1" ClipToBounds="True">
+                <Ellipse Width="620" Height="620" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-400,-270,0" Fill="#281139" Opacity="0.75">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="80"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+                <Ellipse Width="420" Height="420" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-260,0,0,-300" Fill="#17134F" Opacity="0.5">
+                    <Ellipse.Effect>
+                        <BlurEffect Radius="70"/>
+                    </Ellipse.Effect>
+                </Ellipse>
+
+                <Grid x:Name="DashboardPage" Margin="30,25,30,27">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="Sicherheitszentrale" Foreground="White" FontSize="28" FontWeight="SemiBold"/>
+                            <TextBlock Text="Dein Systemstatus auf einen Blick." Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,7,0,0"/>
+                        </StackPanel>
+                        <Border HorizontalAlignment="Right" Background="#171020" BorderBrush="#392746" BorderThickness="1" CornerRadius="20" Padding="15,9">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="HeaderStatusDot" Width="8" Height="8" Fill="#FF6A8D" Margin="0,0,9,0"/>
+                                <TextBlock x:Name="HeaderStatusText" Text="Einrichtung erforderlich" Foreground="#D8CFDD" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,24,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1.25*"/>
+                            <RowDefinition Height="0.75*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.45*"/>
+                            <ColumnDefinition Width="0.85*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource Card}" Margin="0,0,14,14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="190"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <Border Width="74" Height="26" Background="#31203E" CornerRadius="13" HorizontalAlignment="Left" Margin="0,0,0,18">
+                                        <TextBlock Text="SYSTEM STATUS" Foreground="#C36AFF" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock x:Name="ProtectionTitle" Text="Bereit für den ersten Scan" Foreground="White" FontSize="25" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <TextBlock x:Name="ProtectionSubtitle" Text="Verbinde ClamAV, um die Malware-Erkennung zu aktivieren." Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,12,0,24" TextWrapping="Wrap" MaxWidth="410" HorizontalAlignment="Left" LineHeight="21"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="QuickScanDashboardButton" Style="{StaticResource PrimaryButton}" Content="Schnellscan starten" Click="QuickScan_Click"/>
+                                        <Button Style="{StaticResource SecondaryButton}" Content="Tiefenscan" Margin="12,0,0,0" Click="DeepScan_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                                <Grid Grid.Column="1">
+                                    <Ellipse Width="168" Height="168" Fill="#191024" Stroke="#3A2348" StrokeThickness="1"/>
+                                    <Ellipse Width="136" Height="136" Fill="#21132D" Stroke="#683687" StrokeThickness="1.5" Effect="{StaticResource NeonShadow}"/>
+                                    <Path x:Name="MainShield" Width="70" Height="82" Fill="{StaticResource NeonGradient}" Stretch="Uniform"
+                                          Data="M12,2 L22,6 L22,15 C22,22 18,27 12,30 C6,27 2,22 2,15 L2,6 Z M11,9 L11,19 L7,15 L5,17 L12,24 L20,13 L17,11 L13,17 L13,9 Z"/>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="1" Style="{StaticResource Card}" Margin="14,0,0,14">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="LETZTER SCAN" Foreground="#807486" FontSize="10" FontWeight="Bold"/>
+                                <StackPanel Grid.Row="1" VerticalAlignment="Center">
+                                    <TextBlock x:Name="LastScanThreatsText" Text="—" Foreground="White" FontSize="46" FontWeight="Light"/>
+                                    <TextBlock Text="Bedrohungen gefunden" Foreground="{StaticResource MutedBrush}" FontSize="12"/>
+                                </StackPanel>
+                                <StackPanel Grid.Row="2">
+                                    <Separator Background="#352640" Margin="0,0,0,15"/>
+                                    <Grid>
+                                        <TextBlock Text="Zeitpunkt" Foreground="#796E80" FontSize="11"/>
+                                        <TextBlock x:Name="LastScanTimeText" Text="Noch kein Scan" Foreground="#CFC6D5" FontSize="11" HorizontalAlignment="Right"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,14,14,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="DATEIEN GEPRÜFT" Foreground="#807486" FontSize="10" FontWeight="Bold"/>
+                                    <TextBlock x:Name="FilesScannedDashboardText" Text="0" Foreground="White" FontSize="24" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                                </StackPanel>
+                                <Border Grid.Column="1" BorderBrush="#392A42" BorderThickness="1,0">
+                                    <StackPanel VerticalAlignment="Center" Margin="24,0">
+                                        <TextBlock Text="QUARANTÄNE" Foreground="#807486" FontSize="10" FontWeight="Bold"/>
+                                        <TextBlock x:Name="QuarantineCountDashboardText" Text="0" Foreground="White" FontSize="24" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                                    </StackPanel>
+                                </Border>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="24,0,0,0">
+                                    <TextBlock Text="SIGNATUREN" Foreground="#807486" FontSize="10" FontWeight="Bold"/>
+                                    <TextBlock x:Name="SignatureStatusDashboardText" Text="Offline" Foreground="#FF85A0" FontSize="16" FontWeight="SemiBold" Margin="0,12,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Card}" Margin="14,14,0,0">
+                            <StackPanel VerticalAlignment="Center">
+                                <Grid>
+                                    <StackPanel>
+                                        <TextBlock Text="SIGNATUREN" Foreground="#807486" FontSize="10" FontWeight="Bold"/>
+                                        <TextBlock Text="Erkennungsdatenbank" Foreground="White" FontSize="16" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                                    </StackPanel>
+                                    <Border HorizontalAlignment="Right" Width="42" Height="42" Background="#281734" CornerRadius="12">
+                                        <TextBlock Text="↻" Foreground="#C65BFF" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock x:Name="DatabaseStatusText" Text="ClamAV ist noch nicht verbunden." Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,16,0,16" TextWrapping="Wrap"/>
+                                <Button x:Name="UpdateButton" Style="{StaticResource SecondaryButton}" Content="Jetzt aktualisieren" HorizontalAlignment="Stretch" Click="UpdateSignatures_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <Grid x:Name="ScanPage" Visibility="Collapsed" Margin="30,25,30,27">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Malware-Scanner" Foreground="White" FontSize="28" FontWeight="SemiBold"/>
+                        <TextBlock Text="Wähle den passenden Scan für dein System." Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,7,0,0"/>
+                    </StackPanel>
+
+                    <Grid Grid.Row="1" Margin="0,22,0,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource Card}" Padding="16" Margin="0,0,6,0" Cursor="Hand" MouseLeftButtonUp="QuickScanCard_Click">
+                            <StackPanel>
+                                <Border Width="38" Height="38" Background="#2C193A" CornerRadius="11" HorizontalAlignment="Left">
+                                    <TextBlock Text="⚡" Foreground="#D65BFF" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Schnellscan" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,13,0,5"/>
+                                <TextBlock Text="Wichtige Benutzerordner." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource Card}" Padding="16" Margin="6,0" Cursor="Hand" MouseLeftButtonUp="DeepScanCard_Click">
+                            <StackPanel>
+                                <Border Width="38" Height="38" Background="#2C193A" CornerRadius="11" HorizontalAlignment="Left">
+                                    <TextBlock Text="◎" Foreground="#D65BFF" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Tiefenscan" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,13,0,5"/>
+                                <TextBlock Text="Alle lokalen Laufwerke." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource Card}" Padding="16" Margin="6,0" Cursor="Hand" MouseLeftButtonUp="CustomScanCard_Click">
+                            <StackPanel>
+                                <Border Width="38" Height="38" Background="#2C193A" CornerRadius="11" HorizontalAlignment="Left">
+                                    <TextBlock Text="⌗" Foreground="#D65BFF" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Eigener Scan" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,13,0,5"/>
+                                <TextBlock Text="Ordner frei auswählen." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="3" Style="{StaticResource Card}" Padding="16" Margin="6,0" Cursor="Hand" MouseLeftButtonUp="MemoryScanCard_Click">
+                            <StackPanel>
+                                <Border Width="38" Height="38" Background="#2C193A" CornerRadius="11" HorizontalAlignment="Left">
+                                    <TextBlock Text="▥" Foreground="#D65BFF" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Arbeitsspeicher" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,13,0,5"/>
+                                <TextBlock Text="Speicher laufender Prozesse." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="4" Style="{StaticResource Card}" Padding="16" Margin="6,0,0,0" Cursor="Hand" MouseLeftButtonUp="ProcessScanCard_Click">
+                            <StackPanel>
+                                <Border Width="38" Height="38" Background="#2C193A" CornerRadius="11" HorizontalAlignment="Left">
+                                    <TextBlock Text="⚙" Foreground="#D65BFF" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <TextBlock Text="Prozesse" Foreground="White" FontSize="15" FontWeight="SemiBold" Margin="0,13,0,5"/>
+                                <TextBlock Text="EXE-Dateien plus Online-Hashcheck." Foreground="{StaticResource MutedBrush}" FontSize="10" TextWrapping="Wrap" LineHeight="15"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Border Grid.Row="2" Style="{StaticResource Card}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid>
+                                <StackPanel>
+                                    <TextBlock x:Name="ScanStatusTitle" Text="Scanner bereit" Foreground="White" FontSize="20" FontWeight="SemiBold"/>
+                                    <TextBlock x:Name="ScanStatusSubtitle" Text="Starte einen Scan über eine der Optionen oben." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,7,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <Button x:Name="PauseScanButton" Style="{StaticResource SecondaryButton}" Content="Pausieren" Visibility="Collapsed" Click="PauseScan_Click"/>
+                                    <Button x:Name="CancelScanButton" Style="{StaticResource SecondaryButton}" Content="Abbrechen" Margin="10,0,0,0" Visibility="Collapsed" Click="CancelScan_Click"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Grid.Row="1" VerticalAlignment="Center" Margin="0,28">
+                                <ProgressBar x:Name="ScanProgressBar" Value="0"/>
+                                <TextBlock x:Name="CurrentFileText" Text="Noch keine Datei ausgewählt" Foreground="#817687" FontSize="11" Margin="0,14,0,0" TextTrimming="CharacterEllipsis"/>
+                            </StackPanel>
+                            <Grid Grid.Row="2">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="DATEIEN" Foreground="#776C7E" FontSize="10" FontWeight="Bold"/>
+                                    <TextBlock x:Name="FilesScannedText" Text="0" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="BEDROHUNGEN" Foreground="#776C7E" FontSize="10" FontWeight="Bold"/>
+                                    <TextBlock x:Name="ThreatsFoundText" Text="0" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="DAUER" Foreground="#776C7E" FontSize="10" FontWeight="Bold"/>
+                                    <TextBlock x:Name="ScanDurationText" Text="00:00" Foreground="White" FontSize="20" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid x:Name="ReportsPage" Visibility="Collapsed" Margin="30,25,30,27">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="Scanberichte" Foreground="White" FontSize="28" FontWeight="SemiBold"/>
+                            <TextBlock Text="Alle abgeschlossenen, abgebrochenen und fehlgeschlagenen Scans." Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,7,0,0"/>
+                        </StackPanel>
+                        <Button Style="{StaticResource SecondaryButton}" Content="Aktualisieren" HorizontalAlignment="Right" Click="RefreshReports_Click"/>
+                    </Grid>
+
+                    <Grid Grid.Row="1" Margin="0,22,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="330"/>
+                            <ColumnDefinition Width="18"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border Style="{StaticResource Card}" Padding="14">
+                            <Grid>
+                                <ListView x:Name="ReportsList" Background="Transparent" BorderThickness="0" Foreground="White"
+                                          SelectionChanged="ReportsList_SelectionChanged" SelectionMode="Single">
+                                    <ListView.Resources>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="Padding" Value="0"/>
+                                            <Setter Property="Margin" Value="0,0,0,8"/>
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ListViewItem">
+                                                        <Border x:Name="ReportItemBorder" Background="#15101D" BorderBrush="#34263D" BorderThickness="1" CornerRadius="12" Padding="14">
+                                                            <ContentPresenter/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="ReportItemBorder" Property="BorderBrush" Value="#A847E2"/>
+                                                                <Setter TargetName="ReportItemBorder" Property="Background" Value="#281733"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="ReportItemBorder" Property="Background" Value="#201529"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ListView.Resources>
+                                    <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel>
+                                                <Grid>
+                                                    <TextBlock Text="{Binding KindDisplay}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+                                                    <TextBlock Text="{Binding StatusDisplay}" Foreground="#D264FF" FontSize="10" FontWeight="SemiBold" HorizontalAlignment="Right"/>
+                                                </Grid>
+                                                <TextBlock Text="{Binding StartedAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Foreground="#817687" FontSize="10" Margin="0,7,0,0"/>
+                                                <TextBlock Text="{Binding Summary}" Foreground="#A79EAD" FontSize="10" Margin="0,5,0,0"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListView.ItemTemplate>
+                                </ListView>
+                                <StackPanel x:Name="ReportsEmptyState" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="≡" Foreground="#713992" FontSize="48" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Noch keine Berichte" Foreground="White" FontSize="16" FontWeight="SemiBold" Margin="0,10,0,0"/>
+                                    <TextBlock Text="Nach dem ersten Scan erscheint hier der Verlauf." Foreground="{StaticResource MutedBrush}" FontSize="10" Margin="0,7,0,0" TextWrapping="Wrap" TextAlignment="Center" Width="220"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <Border Grid.Column="2" Style="{StaticResource Card}">
+                            <Grid>
+                                <StackPanel x:Name="ReportDetailEmptyState" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                    <TextBlock Text="Scanbericht auswählen" Foreground="White" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Links findest du deine letzten Scans." Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,8,0,0"/>
+                                </StackPanel>
+
+                                <Grid x:Name="ReportDetailPanel" Visibility="Collapsed">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Grid>
+                                        <StackPanel>
+                                            <TextBlock x:Name="ReportTitleText" Text="Schnellscan" Foreground="White" FontSize="22" FontWeight="SemiBold"/>
+                                            <TextBlock x:Name="ReportDateText" Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                        <Border x:Name="ReportStatusBadge" Background="#2B1937" BorderBrush="#6D398B" BorderThickness="1" CornerRadius="14" Padding="13,7" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                            <TextBlock x:Name="ReportStatusText" Foreground="#D264FF" FontSize="11" FontWeight="SemiBold"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <Grid Grid.Row="1" Margin="0,22,0,20">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="DATEIEN" Foreground="#776C7E" FontSize="9" FontWeight="Bold"/>
+                                            <TextBlock x:Name="ReportFilesText" Text="0" Foreground="White" FontSize="19" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="1">
+                                            <TextBlock Text="FUNDE" Foreground="#776C7E" FontSize="9" FontWeight="Bold"/>
+                                            <TextBlock x:Name="ReportThreatsText" Text="0" Foreground="White" FontSize="19" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
+                                            <TextBlock Text="ISOLIERT" Foreground="#776C7E" FontSize="9" FontWeight="Bold"/>
+                                            <TextBlock x:Name="ReportQuarantinedText" Text="0" Foreground="White" FontSize="19" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="3">
+                                            <TextBlock Text="DAUER" Foreground="#776C7E" FontSize="9" FontWeight="Bold"/>
+                                            <TextBlock x:Name="ReportDurationText" Text="00:00" Foreground="White" FontSize="19" FontWeight="SemiBold" Margin="0,6,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+
+                                    <TabControl Grid.Row="2" Background="Transparent" BorderBrush="#3A2946" Foreground="White">
+                                        <TabItem Header="Funde">
+                                            <ListView x:Name="ReportThreatList" Background="#100B17" BorderThickness="0" Foreground="White">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Margin="10,8">
+                                                            <TextBlock Text="{Binding Signature}" Foreground="#FF7FAB" FontWeight="SemiBold" FontSize="12"/>
+                                                            <TextBlock Text="{Binding FilePath}" Foreground="#85798C" FontSize="10" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </TabItem>
+                                        <TabItem Header="Scan-Ziele">
+                                            <ListView x:Name="ReportTargetsList" Background="#100B17" BorderThickness="0" Foreground="#CFC6D5"/>
+                                        </TabItem>
+                                        <TabItem Header="Hinweise &amp; Fehler">
+                                            <ListView x:Name="ReportErrorsList" Background="#100B17" BorderThickness="0" Foreground="#CFC6D5"/>
+                                        </TabItem>
+                                        <TabItem Header="Online-Reputation">
+                                            <ListView x:Name="ReportOnlineList" Background="#100B17" BorderThickness="0" Foreground="White">
+                                                <ListView.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <StackPanel Margin="10,8">
+                                                            <TextBlock Text="{Binding VerdictDisplay}" Foreground="#D264FF" FontWeight="SemiBold" FontSize="11"/>
+                                                            <TextBlock Text="{Binding FilePath}" Foreground="#85798C" FontSize="10" Margin="0,5,0,0" TextWrapping="Wrap"/>
+                                                            <TextBlock Text="{Binding Sha256}" Foreground="#5F5664" FontSize="9" Margin="0,4,0,0" TextTrimming="CharacterEllipsis"/>
+                                                        </StackPanel>
+                                                    </DataTemplate>
+                                                </ListView.ItemTemplate>
+                                            </ListView>
+                                        </TabItem>
+                                    </TabControl>
+
+                                    <Grid Grid.Row="3" Margin="0,18,0,0">
+                                        <TextBlock x:Name="ReportEngineText" Foreground="#776C7E" FontSize="10" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                                        <Button Style="{StaticResource SecondaryButton}" Content="Bericht löschen" HorizontalAlignment="Right" Click="DeleteReport_Click"/>
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <Grid x:Name="QuarantinePage" Visibility="Collapsed" Margin="30,25,30,27">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <StackPanel>
+                            <TextBlock Text="Quarantäne" Foreground="White" FontSize="28" FontWeight="SemiBold"/>
+                            <TextBlock Text="Isolierte Dateien können geprüft, wiederhergestellt oder endgültig entfernt werden." Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,7,0,0"/>
+                        </StackPanel>
+                        <Button Style="{StaticResource SecondaryButton}" Content="Liste aktualisieren" HorizontalAlignment="Right" Click="RefreshQuarantine_Click"/>
+                    </Grid>
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,27,0,0">
+                        <Grid>
+                            <ListView x:Name="QuarantineList" Background="Transparent" BorderThickness="0" Foreground="White" SelectionMode="Single">
+                                <ListView.Resources>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Background" Value="Transparent"/>
+                                        <Setter Property="Foreground" Value="White"/>
+                                        <Setter Property="Padding" Value="0"/>
+                                        <Setter Property="Margin" Value="0,0,0,9"/>
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ListViewItem">
+                                                    <Border x:Name="ItemBorder" Background="#15101D" BorderBrush="#34263D" BorderThickness="1" CornerRadius="13" Padding="16">
+                                                        <ContentPresenter/>
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsSelected" Value="True">
+                                                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#A847E2"/>
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="#23152E"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="ItemBorder" Property="Background" Value="#1E1528"/>
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ListView.Resources>
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="44"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="180"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="36" Height="36" Background="#3A1833" CornerRadius="10">
+                                                <TextBlock Text="!" Foreground="#FF6D9D" FontWeight="Bold" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Margin="10,0,16,0">
+                                                <TextBlock Text="{Binding ThreatName}" Foreground="White" FontWeight="SemiBold" FontSize="13"/>
+                                                <TextBlock Text="{Binding OriginalPath}" Foreground="#7E7385" FontSize="10" Margin="0,5,0,0" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" HorizontalAlignment="Right">
+                                                <TextBlock Text="{Binding QuarantinedAt, StringFormat={}{0:dd.MM.yyyy HH:mm}}" Foreground="#B0A5B6" FontSize="11" HorizontalAlignment="Right"/>
+                                                <TextBlock Text="{Binding OriginalSize, StringFormat={}{0:N0} Bytes}" Foreground="#706675" FontSize="10" Margin="0,5,0,0" HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
+                            <StackPanel x:Name="QuarantineEmptyState" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="◇" Foreground="#713992" FontSize="54" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Quarantäne ist leer" Foreground="White" FontSize="18" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,12,0,0"/>
+                                <TextBlock Text="Isolierte Funde erscheinen automatisch hier." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,8,0,0"/>
+                            </StackPanel>
+                            <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Right" Orientation="Horizontal">
+                                <Button Style="{StaticResource SecondaryButton}" Content="Wiederherstellen" Click="RestoreQuarantine_Click"/>
+                                <Button Style="{StaticResource PrimaryButton}" Content="Endgültig löschen" Margin="12,0,0,0" Click="DeleteQuarantine_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <Grid x:Name="SettingsPage" Visibility="Collapsed" Margin="30,25,30,27">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Einstellungen" Foreground="White" FontSize="28" FontWeight="SemiBold"/>
+                        <TextBlock Text="Engine, Scantiefe und Reaktion auf Bedrohungen konfigurieren." Foreground="{StaticResource MutedBrush}" FontSize="13" Margin="0,7,0,0"/>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" Margin="0,27,0,0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel>
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="ClamAV Engine" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Ordner mit clamscan.exe und freshclam.exe" Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,7,0,18"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="ClamAvPathTextBox" VerticalContentAlignment="Center"/>
+                                        <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Durchsuchen" Margin="12,0,0,0" Click="BrowseClamAv_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="Scanoptionen" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                                    <CheckBox x:Name="AutoQuarantineCheckBox" Content="Gefundene Bedrohungen automatisch isolieren" Foreground="#D7CEDC" Margin="0,20,0,0" IsChecked="True"/>
+                                    <CheckBox x:Name="ScanArchivesCheckBox" Content="Archive und Container durchsuchen" Foreground="#D7CEDC" Margin="0,16,0,0" IsChecked="True"/>
+                                    <CheckBox x:Name="ScanPuaCheckBox" Content="Potenziell unerwünschte Anwendungen erkennen" Foreground="#D7CEDC" Margin="0,16,0,0" IsChecked="True"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <TextBlock Text="Online-Reputation" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                                    <TextBlock Text="Beim Prozess-Scan werden ausschließlich SHA-256-Hashes an VirusTotal übertragen. Dateien werden nicht hochgeladen." Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,7,0,16" TextWrapping="Wrap"/>
+                                    <CheckBox x:Name="OnlineReputationCheckBox" Content="VirusTotal-Hashabgleich aktivieren" Foreground="#D7CEDC"/>
+                                    <TextBlock Text="Persönlicher VirusTotal API-Schlüssel" Foreground="#9B90A2" FontSize="10" Margin="0,16,0,7"/>
+                                    <PasswordBox x:Name="VirusTotalApiKeyBox" Background="#130D1D" Foreground="White" BorderBrush="#4D345E" BorderThickness="1" Padding="14,11"/>
+                                    <TextBlock Text="Der Schlüssel wird mit dem Windows-Benutzerkonto verschlüsselt gespeichert. Öffentliche API-Limits können den Scan verlangsamen." Foreground="#706675" FontSize="10" Margin="0,9,0,0" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Grid>
+                                <Button Style="{StaticResource PrimaryButton}" Content="Einstellungen speichern" HorizontalAlignment="Left" Click="SaveSettings_Click"/>
+                                <TextBlock x:Name="SettingsFeedbackText" Foreground="#62E9BD" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                            </Grid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>
