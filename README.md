@@ -61,7 +61,7 @@ Windows-Installer automatisch:
 
 - bei Änderungen auf `main`,
 - manuell über **Actions → Build Windows installer → Run workflow**,
-- beim Push eines Versionstags wie `v1.4.1`.
+- beim Push eines Versionstags wie `v1.5.2`.
 
 Bei einem normalen Build kann die Setup-EXE auf der Seite des Workflow-Laufs
 unter **Artifacts** heruntergeladen werden. Ein Versionstag erzeugt zusätzlich
@@ -72,8 +72,8 @@ Beispiel für eine Veröffentlichung über GitHub Desktop:
 
 1. Änderungen committen und pushen.
 2. In GitHub Desktop **Repository → Open in Terminal** öffnen.
-3. `git tag v1.4.1` ausführen.
-4. `git push origin v1.4.1` ausführen.
+3. `git tag v1.5.2` ausführen.
+4. `git push origin v1.5.2` ausführen.
 
 Während der Installation:
 

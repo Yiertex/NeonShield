@@ -2,7 +2,7 @@
 
 Alle wichtigen Änderungen an NeonShield werden in dieser Datei dokumentiert.
 
-## [1.4.1] - 2026-06-21
+## [1.5.2] - 2026-06-21
 
 ### Hinzugefügt
 
