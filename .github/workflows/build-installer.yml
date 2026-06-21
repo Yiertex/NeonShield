@@ -117,31 +117,22 @@ jobs:
           $hash = Get-FileHash $installer.FullName -Algorithm SHA256
           "path=$($installer.FullName)" >> $env:GITHUB_OUTPUT
           "sha256=$($hash.Hash)" >> $env:GITHUB_OUTPUT
+          "$($hash.Hash)  $($installer.Name)" |
+            Set-Content .\release-assets\SHA256SUMS.txt -Encoding ascii
 
       - name: Create or update GitHub release
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-          INSTALLER_PATH: ${{ steps.installer.outputs.path }}
-          INSTALLER_SHA256: ${{ steps.installer.outputs.sha256 }}
-        run: |
-          $tag = "${{ github.ref_name }}"
-          $title = "NeonShield $tag"
-          $notes = @"
-          Automatisch erstellter Windows-Installer für NeonShield.
+        uses: softprops/action-gh-release@v3
+        with:
+          name: NeonShield ${{ github.ref_name }}
+          body: |
+            Automatisch erstellter Windows-Installer für NeonShield.
 
-          SHA-256: ``$env:INSTALLER_SHA256``
-
-          Hinweis: Die ClamAV-Engine und Signaturen werden während der Installation
-          aus den offiziellen Quellen heruntergeladen.
-          "@
-
-          gh release view $tag *> $null
-          if ($LASTEXITCODE -ne 0) {
-            gh release create $tag `
-              --title $title `
-              --notes $notes `
-              --prerelease
-          }
-
-          gh release upload $tag $env:INSTALLER_PATH --clobber
+            Die SHA-256-Prüfsumme steht zusätzlich in `SHA256SUMS.txt`.
+            Die ClamAV-Engine und Signaturen werden während der Installation
+            aus den offiziellen Quellen heruntergeladen.
+          files: |
+            release-assets/NeonShield-Setup-*.exe
+            release-assets/SHA256SUMS.txt
+          prerelease: true
+          fail_on_unmatched_files: true
+          overwrite_files: true
