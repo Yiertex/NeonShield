@@ -85,7 +85,21 @@ public sealed class ScanHistoryService
         try
         {
             await using var stream = File.OpenRead(_historyPath);
-            return await JsonSerializer.DeserializeAsync<List<ScanReport>>(stream, JsonOptions) ?? [];
+            var reports = await JsonSerializer.DeserializeAsync<List<ScanReport>>(stream, JsonOptions) ?? [];
+            foreach (var report in reports)
+            {
+                if (report.Status == ScanReportStatus.Completed &&
+                    report.Errors.Any(error =>
+                        error.Contains("Code 2", StringComparison.OrdinalIgnoreCase) ||
+                        error.Contains("Can't load", StringComparison.OrdinalIgnoreCase) ||
+                        error.Contains("Can't verify", StringComparison.OrdinalIgnoreCase) ||
+                        error.Contains("Initialization error", StringComparison.OrdinalIgnoreCase)))
+                {
+                    report.Status = ScanReportStatus.Failed;
+                }
+            }
+
+            return reports;
         }
         catch
         {

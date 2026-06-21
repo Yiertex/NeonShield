@@ -2,7 +2,7 @@
 
 Alle wichtigen Änderungen an NeonShield werden in dieser Datei dokumentiert.
 
-## [1.2.0] - Unreleased
+## [1.4.1] - 2026-06-21
 
 ### Hinzugefügt
 
@@ -18,6 +18,9 @@ Alle wichtigen Änderungen an NeonShield werden in dieser Datei dokumentiert.
 - automatische Versionsübernahme aus Git-Tags
 - verbesserte Release- und Installer-Prüfungen
 - vollständige MIT-Lizenz und Datenschutz-/Sicherheitsdokumentation
+- korrekte Bereitstellung des offiziellen ClamAV-CVD-Zertifikats
+- fehlgeschlagene ClamAV-Scans werden nicht mehr als „Sauber“ protokolliert
+- zuverlässiger Upload von Installer und SHA-256-Datei in GitHub Releases
 
 ## [1.1.0] - 2026-06-20
 

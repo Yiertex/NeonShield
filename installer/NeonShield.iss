@@ -1,6 +1,6 @@
 #define AppName "NeonShield"
 #ifndef AppVersion
-  #define AppVersion "1.2.0"
+  #define AppVersion "1.4.1"
 #endif
 #define AppPublisher "Yiertex"
 #define AppExeName "NeonShield.exe"
@@ -47,7 +47,6 @@ Filename: "{app}\{#AppExeName}"; Description: "{#AppName} starten"; Flags: nowai
 Type: filesandordirs; Name: "{app}\Engine"
 Type: filesandordirs; Name: "{app}\Engine.previous"
 Type: filesandordirs; Name: "{localappdata}\NeonShield\Database"
-Type: filesandordirs; Name: "{localappdata}\NeonShield\CvdCerts"
 Type: files; Name: "{localappdata}\NeonShield\freshclam.conf"
 Type: files; Name: "{localappdata}\NeonShield\engine-install.log"
 

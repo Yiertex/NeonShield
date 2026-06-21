@@ -40,8 +40,14 @@ public sealed class ClamAvService
 
         return candidates
             .Select(candidate => candidate.Trim().Trim('"'))
-            .FirstOrDefault(candidate => File.Exists(Path.Combine(candidate, "clamscan.exe")));
+            .FirstOrDefault(IsUsableDirectory);
     }
+
+    public bool IsUsableDirectory(string? directory) =>
+        !string.IsNullOrWhiteSpace(directory) &&
+        File.Exists(Path.Combine(directory, "clamscan.exe")) &&
+        File.Exists(Path.Combine(directory, "freshclam.exe")) &&
+        File.Exists(Path.Combine(directory, "certs", "clamav.crt"));
 
     public async Task<string> GetVersionAsync(string clamAvDirectory)
     {
@@ -58,9 +64,9 @@ public sealed class ClamAvService
             throw new FileNotFoundException("freshclam.exe wurde im gewählten ClamAV-Ordner nicht gefunden.");
         }
 
-        var configPath = EngineManagerService.EnsureFreshClamConfiguration();
+        var configPath = EngineManagerService.EnsureFreshClamConfiguration(clamAvDirectory);
         var databaseDirectory = EngineManagerService.GetDatabaseDirectory();
-        var certificateDirectory = EngineManagerService.GetCvdCertificateDirectory();
+        var certificateDirectory = EngineManagerService.GetCvdCertificateDirectory(clamAvDirectory);
         return await RunUtilityAsync(
             executable,
             [
@@ -136,7 +142,7 @@ public sealed class ClamAvService
 
         var startInfo = CreateBaseStartInfo(executable);
         startInfo.ArgumentList.Add($"--database={EngineManagerService.GetDatabaseDirectory()}");
-        startInfo.ArgumentList.Add($"--cvdcertsdir={EngineManagerService.GetCvdCertificateDirectory()}");
+        startInfo.ArgumentList.Add($"--cvdcertsdir={EngineManagerService.GetCvdCertificateDirectory(clamAvDirectory)}");
         startInfo.ArgumentList.Add("--memory");
         return await RunScanProcessAsync(
             startInfo,
@@ -181,6 +187,7 @@ public sealed class ClamAvService
         var threats = new List<ThreatDetection>();
         var errors = new List<string>();
         long filesScanned = 0;
+        var exitCode = 0;
 
         try
         {
@@ -237,10 +244,11 @@ public sealed class ClamAvService
 
             await process.WaitForExitAsync(cancellationToken);
             await Task.WhenAll(stdoutTask, stderrTask);
+            exitCode = process.ExitCode;
 
-            if (process.ExitCode > 1)
+            if (exitCode > 1)
             {
-                errors.Add($"ClamAV beendete den Scan mit Code {process.ExitCode}.");
+                errors.Add($"ClamAV beendete den Scan mit Code {exitCode}.");
             }
         }
         catch (OperationCanceledException)
@@ -253,7 +261,8 @@ public sealed class ClamAvService
                 FilesScanned = filesScanned,
                 Threats = threats,
                 Errors = errors,
-                WasCancelled = true
+                WasCancelled = true,
+                ExitCode = -1
             };
         }
         finally
@@ -271,7 +280,8 @@ public sealed class ClamAvService
             FinishedAt = DateTimeOffset.Now,
             FilesScanned = filesScanned,
             Threats = threats,
-            Errors = errors
+            Errors = errors,
+            ExitCode = exitCode
         };
     }
 
@@ -287,7 +297,8 @@ public sealed class ClamAvService
         startInfo.ArgumentList.Add("--max-scansize=300M");
         startInfo.ArgumentList.Add("--max-recursion=30");
         startInfo.ArgumentList.Add($"--database={EngineManagerService.GetDatabaseDirectory()}");
-        startInfo.ArgumentList.Add($"--cvdcertsdir={EngineManagerService.GetCvdCertificateDirectory()}");
+        startInfo.ArgumentList.Add(
+            $"--cvdcertsdir={EngineManagerService.GetCvdCertificateDirectory(Path.GetDirectoryName(executable)!)}");
         startInfo.ArgumentList.Add(settings.ScanArchives ? "--scan-archive=yes" : "--scan-archive=no");
         startInfo.ArgumentList.Add(settings.ScanPotentiallyUnwanted ? "--detect-pua=yes" : "--detect-pua=no");
         startInfo.ArgumentList.Add(@"--exclude-dir=\\System Volume Information$");

@@ -51,6 +51,7 @@ public sealed class ScanResult
     public List<ThreatDetection> Threats { get; init; } = [];
     public List<string> Errors { get; init; } = [];
     public bool WasCancelled { get; init; }
+    public int ExitCode { get; init; }
 }
 
 public enum ScanReportStatus

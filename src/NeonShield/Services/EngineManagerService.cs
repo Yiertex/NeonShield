@@ -58,11 +58,13 @@ public sealed class EngineManagerService
         var asset = SelectWindowsAsset(release);
         var currentMetadata = await LoadMetadataAsync();
         var engineExecutable = Path.Combine(ManagedEngineDirectory, "clamscan.exe");
+        var engineCertificate = Path.Combine(ManagedEngineDirectory, "certs", "clamav.crt");
 
         if (File.Exists(engineExecutable) &&
+            File.Exists(engineCertificate) &&
             string.Equals(currentMetadata?.VersionTag, release.TagName, StringComparison.OrdinalIgnoreCase))
         {
-            EnsureDataDirectories();
+            EnsureDataDirectories(ManagedEngineDirectory);
             return new EngineUpdateResult
             {
                 EngineDirectory = ManagedEngineDirectory,
@@ -104,9 +106,15 @@ public sealed class EngineManagerService
 
             var extractedEngineRoot = Path.GetDirectoryName(clamscanPath)
                                       ?? throw new InvalidDataException("Der Engine-Ordner konnte nicht ermittelt werden.");
+            var extractedCertificate = Path.Combine(extractedEngineRoot, "certs", "clamav.crt");
+            if (!File.Exists(extractedCertificate))
+            {
+                throw new InvalidDataException(
+                    "Das offizielle ClamAV-Archiv enthält das benötigte Zertifikat certs\\clamav.crt nicht.");
+            }
 
             ReplaceManagedEngine(extractedEngineRoot, release.TagName, asset);
-            EnsureDataDirectories();
+            EnsureDataDirectories(ManagedEngineDirectory);
 
             return new EngineUpdateResult
             {
@@ -131,23 +139,28 @@ public sealed class EngineManagerService
         return dataDirectory;
     }
 
-    public static string GetCvdCertificateDirectory()
+    public static string GetCvdCertificateDirectory(string clamAvDirectory)
     {
-        var certificateDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "NeonShield",
-            "CvdCerts");
-        Directory.CreateDirectory(certificateDirectory);
+        var certificateDirectory = Path.Combine(clamAvDirectory, "certs");
+        var certificatePath = Path.Combine(certificateDirectory, "clamav.crt");
+        if (!File.Exists(certificatePath))
+        {
+            throw new FileNotFoundException(
+                "Das ClamAV-Datenbankzertifikat certs\\clamav.crt fehlt. " +
+                "Die verwaltete Engine muss erneut installiert werden.",
+                certificatePath);
+        }
+
         return certificateDirectory;
     }
 
-    public static string EnsureFreshClamConfiguration()
+    public static string EnsureFreshClamConfiguration(string clamAvDirectory)
     {
         var dataRoot = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "NeonShield");
         var databaseDirectory = GetDatabaseDirectory();
-        var certificateDirectory = GetCvdCertificateDirectory();
+        var certificateDirectory = GetCvdCertificateDirectory(clamAvDirectory);
         var configPath = Path.Combine(dataRoot, "freshclam.conf");
         Directory.CreateDirectory(dataRoot);
 
@@ -319,11 +332,11 @@ public sealed class EngineManagerService
         }
     }
 
-    private static void EnsureDataDirectories()
+    private static void EnsureDataDirectories(string clamAvDirectory)
     {
         GetDatabaseDirectory();
-        GetCvdCertificateDirectory();
-        EnsureFreshClamConfiguration();
+        GetCvdCertificateDirectory(clamAvDirectory);
+        EnsureFreshClamConfiguration(clamAvDirectory);
     }
 
     private static void TryDeleteDirectory(string path)

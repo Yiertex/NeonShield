@@ -327,6 +327,7 @@ public partial class MainWindow : Window
             var quarantinedCount = 0;
             if (_settings.AutoQuarantine &&
                 !result.WasCancelled &&
+                result.ExitCode <= 1 &&
                 kind is ScanKind.Quick or ScanKind.Deep or ScanKind.Custom)
             {
                 foreach (var threat in result.Threats)
@@ -362,7 +363,8 @@ public partial class MainWindow : Window
             if (kind == ScanKind.Processes &&
                 _settings.EnableOnlineReputation &&
                 !string.IsNullOrWhiteSpace(apiKey) &&
-                !result.WasCancelled)
+                !result.WasCancelled &&
+                result.ExitCode <= 1)
             {
                 ScanStatusTitle.Text = "Online-Reputation wird geprüft";
                 ScanStatusSubtitle.Text = "Es werden ausschließlich SHA-256-Hashes an VirusTotal übertragen.";
@@ -377,7 +379,9 @@ public partial class MainWindow : Window
             _lastFilesScanned = result.FilesScanned;
             report.Status = result.WasCancelled
                 ? ScanReportStatus.Cancelled
-                : ScanReportStatus.Completed;
+                : result.ExitCode > 1
+                    ? ScanReportStatus.Failed
+                    : ScanReportStatus.Completed;
             report.FinishedAt = DateTimeOffset.Now;
             report.PausedDuration = GetTotalPausedDuration();
             report.OnlineResults = onlineResults;
@@ -446,6 +450,14 @@ public partial class MainWindow : Window
         {
             ScanStatusTitle.Text = "Scan abgebrochen";
             ScanStatusSubtitle.Text = $"{result.FilesScanned:N0} Dateien wurden bis zum Abbruch geprüft.";
+        }
+        else if (result.ExitCode > 1)
+        {
+            ScanStatusTitle.Text = "Scan fehlgeschlagen";
+            ScanStatusSubtitle.Text = result.Errors.LastOrDefault()
+                                      ?? $"ClamAV wurde mit Code {result.ExitCode} beendet.";
+            ProtectionTitle.Text = "Scan konnte nicht abgeschlossen werden";
+            ProtectionSubtitle.Text = "Die Datenbank oder Engine konnte nicht korrekt geladen werden.";
         }
         else if (result.Threats.Count == 0)
         {
@@ -621,7 +633,8 @@ public partial class MainWindow : Window
         try
         {
             string? engineUpdateWarning = null;
-            if (_engineManager.IsManagedDirectory(_settings.ClamAvDirectory))
+            if (_engineManager.IsManagedDirectory(_settings.ClamAvDirectory) ||
+                !_clamAvService.IsUsableDirectory(_settings.ClamAvDirectory))
             {
                 try
                 {
@@ -660,6 +673,17 @@ public partial class MainWindow : Window
             var output = await _clamAvService.UpdateSignaturesAsync(
                 _clamAvDirectory,
                 CancellationToken.None);
+            if (_engineManager.IsManagedDirectory(_clamAvDirectory) &&
+                !string.Equals(
+                    _settings.ClamAvDirectory,
+                    _clamAvDirectory,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                _settings.ClamAvDirectory = _clamAvDirectory;
+                ClamAvPathTextBox.Text = _clamAvDirectory;
+                await _settingsService.SaveAsync(_settings);
+            }
+
             var signatureStatus = output.Contains("up-to-date", StringComparison.OrdinalIgnoreCase)
                 ? "Datenbank ist bereits aktuell."
                 : "Signaturen wurden aktualisiert.";

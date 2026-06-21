@@ -17,8 +17,8 @@
 ## Veröffentlichung
 
 ```powershell
-git tag v1.2.0
-git push origin v1.2.0
+git tag v1.4.1
+git push origin v1.4.1
 ```
 
 Danach unter **GitHub → Actions** prüfen:
