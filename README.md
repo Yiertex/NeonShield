@@ -12,7 +12,10 @@ Virensignaturen bereit, sondern startet die lokal installierten Programme
 - Schnellscan für Desktop, Dokumente, Downloads und temporäre Dateien
 - Tiefenscan über alle lokalen Festplatten
 - Benutzerdefinierter Ordnerscan
-- Fortschritt, Abbruch und Scan-Zusammenfassung
+- Arbeitsspeicher- und Prozess-Scan
+- Pausieren, Fortsetzen und Abbrechen laufender Scans
+- dauerhafte Scanberichte mit Verlauf und Funddetails
+- optionaler VirusTotal-Hashabgleich ohne Datei-Upload
 - Automatische Quarantäne mit Wiederherstellen und endgültigem Löschen
 - Aktualisierung der ClamAV-Signaturen über `freshclam`
 - Dunkle, violette Neon-Oberfläche
@@ -20,13 +23,11 @@ Virensignaturen bereit, sondern startet die lokal installierten Programme
 ## Voraussetzungen
 
 - Windows 10 oder neuer
-- [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
-- [ClamAV für Windows](https://www.clamav.net/downloads)
+- Für den Installer sind keine weiteren Laufzeiten erforderlich.
+- Für lokale Builds wird das [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) benötigt.
 
-Nach der ClamAV-Installation müssen `freshclam.conf` und gegebenenfalls die
-Signaturdatenbank eingerichtet werden. Die offizielle Anleitung beschreibt
-die Windows-Installation und Konfiguration:
-[docs.clamav.net](https://docs.clamav.net/manual/Installing.html)
+Der Installer lädt die offizielle ClamAV-Engine und Signaturdatenbank
+automatisch. Eine Internetverbindung ist bei Installation und Updates nötig.
 
 ## Bauen und starten
 
@@ -60,7 +61,7 @@ Windows-Installer automatisch:
 
 - bei Änderungen auf `main`,
 - manuell über **Actions → Build Windows installer → Run workflow**,
-- beim Push eines Versionstags wie `v1.1.0`.
+- beim Push eines Versionstags wie `v1.2.0`.
 
 Bei einem normalen Build kann die Setup-EXE auf der Seite des Workflow-Laufs
 unter **Artifacts** heruntergeladen werden. Ein Versionstag erzeugt zusätzlich
@@ -71,8 +72,8 @@ Beispiel für eine Veröffentlichung über GitHub Desktop:
 
 1. Änderungen committen und pushen.
 2. In GitHub Desktop **Repository → Open in Terminal** öffnen.
-3. `git tag v1.1.0` ausführen.
-4. `git push origin v1.1.0` ausführen.
+3. `git tag v1.2.0` ausführen.
+4. `git push origin v1.2.0` ausführen.
 
 Während der Installation:
 
@@ -113,6 +114,9 @@ C:\Program Files\ClamAV
 - Ein kompletter Tiefenscan kann lange dauern und auf geschützte Windows-
   Ordner ohne Administratorrechte nicht zugreifen.
 - Für aussagekräftige Ergebnisse müssen die ClamAV-Signaturen aktuell sein.
+- Der optionale VirusTotal-Abgleich überträgt SHA-256-Hashes und ist
+  standardmäßig deaktiviert. Beachte die Einschränkungen der VirusTotal
+  Public API.
 
 ## Datenablage
 
@@ -123,3 +127,13 @@ Einstellungen und Quarantäne-Metadaten liegen unter:
 ```
 
 Die isolierten Dateien erhalten zufällige Namen mit der Endung `.qtn`.
+
+## Datenschutz, Sicherheit und Lizenz
+
+- [Datenschutz](PRIVACY.md)
+- [Sicherheitsrichtlinie](SECURITY.md)
+- [Änderungsverlauf](CHANGELOG.md)
+- [MIT-Lizenz](LICENSE)
+
+ClamAV bleibt separate Drittsoftware unter der GNU GPL v2. Weitere Hinweise
+stehen in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

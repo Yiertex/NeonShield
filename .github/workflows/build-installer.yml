@@ -12,7 +12,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build:
@@ -48,8 +48,18 @@ jobs:
           Write-Host "Inno Setup: $compiler"
 
       - name: Build application and installer
+        id: build
         shell: pwsh
-        run: .\Build-Installer.ps1
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $version = "${{ github.ref_name }}".TrimStart("v")
+          } else {
+            [xml]$project = Get-Content -Raw .\src\NeonShield\NeonShield.csproj
+            $version = [string]$project.Project.PropertyGroup.Version
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          .\Build-Installer.ps1 -Version $version
 
       - name: Verify installer
         id: installer
@@ -78,8 +88,37 @@ jobs:
           if-no-files-found: error
           compression-level: 0
 
+  release:
+    name: Publish GitHub release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download installer artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: NeonShield-Windows-Installer
+          path: release-assets
+
+      - name: Verify downloaded installer
+        id: installer
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem .\release-assets\NeonShield-Setup-*.exe |
+            Select-Object -First 1
+
+          if (-not $installer) {
+            throw "Die Installer-EXE wurde nicht aus dem Build-Artefakt geladen."
+          }
+
+          $hash = Get-FileHash $installer.FullName -Algorithm SHA256
+          "path=$($installer.FullName)" >> $env:GITHUB_OUTPUT
+          "sha256=$($hash.Hash)" >> $env:GITHUB_OUTPUT
+
       - name: Create or update GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}

@@ -325,7 +325,9 @@ public partial class MainWindow : Window
 
             var quarantineFailures = new List<string>();
             var quarantinedCount = 0;
-            if (_settings.AutoQuarantine && !result.WasCancelled)
+            if (_settings.AutoQuarantine &&
+                !result.WasCancelled &&
+                kind is ScanKind.Quick or ScanKind.Deep or ScanKind.Custom)
             {
                 foreach (var threat in result.Threats)
                 {
@@ -348,6 +350,12 @@ public partial class MainWindow : Window
                     }
                 }
             }
+
+            report.FilesScanned = result.FilesScanned;
+            report.Threats = result.Threats;
+            report.Errors = result.Errors;
+            report.QuarantinedCount = quarantinedCount;
+            report.QuarantineFailures = quarantineFailures;
 
             var onlineResults = new List<OnlineReputationResult>();
             var apiKey = VirusTotalApiKeyBox.Password.Trim();
@@ -372,11 +380,6 @@ public partial class MainWindow : Window
                 : ScanReportStatus.Completed;
             report.FinishedAt = DateTimeOffset.Now;
             report.PausedDuration = GetTotalPausedDuration();
-            report.FilesScanned = result.FilesScanned;
-            report.Threats = result.Threats;
-            report.Errors = result.Errors;
-            report.QuarantinedCount = quarantinedCount;
-            report.QuarantineFailures = quarantineFailures;
             report.OnlineResults = onlineResults;
             await _scanHistoryService.SaveAsync(report);
 

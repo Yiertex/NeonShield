@@ -60,11 +60,13 @@ public sealed class ClamAvService
 
         var configPath = EngineManagerService.EnsureFreshClamConfiguration();
         var databaseDirectory = EngineManagerService.GetDatabaseDirectory();
+        var certificateDirectory = EngineManagerService.GetCvdCertificateDirectory();
         return await RunUtilityAsync(
             executable,
             [
                 $"--config-file={configPath}",
                 $"--datadir={databaseDirectory}",
+                $"--cvdcertsdir={certificateDirectory}",
                 "--stdout"
             ],
             cancellationToken);
@@ -87,12 +89,38 @@ public sealed class ClamAvService
             .Where(target => Directory.Exists(target) || File.Exists(target))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
-        var startInfo = CreateScanStartInfo(executable, validTargets, settings);
-        return await RunScanProcessAsync(
-            startInfo,
-            validTargets.FirstOrDefault() ?? "Dateisystem",
-            progress,
-            cancellationToken);
+        string? fileListPath = null;
+        try
+        {
+            if (validTargets.Count > 20)
+            {
+                fileListPath = Path.Combine(
+                    Path.GetTempPath(),
+                    $"neonshield-targets-{Guid.NewGuid():N}.txt");
+                await File.WriteAllLinesAsync(fileListPath, validTargets, new UTF8Encoding(false), cancellationToken);
+            }
+
+            var startInfo = CreateScanStartInfo(executable, validTargets, fileListPath, settings);
+            return await RunScanProcessAsync(
+                startInfo,
+                validTargets.FirstOrDefault() ?? "Dateisystem",
+                progress,
+                cancellationToken);
+        }
+        finally
+        {
+            if (fileListPath is not null)
+            {
+                try
+                {
+                    File.Delete(fileListPath);
+                }
+                catch
+                {
+                    // Temporary target lists contain paths only and are cleaned up best-effort.
+                }
+            }
+        }
     }
 
     public async Task<ScanResult> ScanMemoryAsync(
@@ -108,6 +136,7 @@ public sealed class ClamAvService
 
         var startInfo = CreateBaseStartInfo(executable);
         startInfo.ArgumentList.Add($"--database={EngineManagerService.GetDatabaseDirectory()}");
+        startInfo.ArgumentList.Add($"--cvdcertsdir={EngineManagerService.GetCvdCertificateDirectory()}");
         startInfo.ArgumentList.Add("--memory");
         return await RunScanProcessAsync(
             startInfo,
@@ -249,6 +278,7 @@ public sealed class ClamAvService
     private static ProcessStartInfo CreateScanStartInfo(
         string executable,
         IReadOnlyList<string> targets,
+        string? fileListPath,
         AppSettings settings)
     {
         var startInfo = CreateBaseStartInfo(executable);
@@ -257,13 +287,21 @@ public sealed class ClamAvService
         startInfo.ArgumentList.Add("--max-scansize=300M");
         startInfo.ArgumentList.Add("--max-recursion=30");
         startInfo.ArgumentList.Add($"--database={EngineManagerService.GetDatabaseDirectory()}");
+        startInfo.ArgumentList.Add($"--cvdcertsdir={EngineManagerService.GetCvdCertificateDirectory()}");
         startInfo.ArgumentList.Add(settings.ScanArchives ? "--scan-archive=yes" : "--scan-archive=no");
         startInfo.ArgumentList.Add(settings.ScanPotentiallyUnwanted ? "--detect-pua=yes" : "--detect-pua=no");
         startInfo.ArgumentList.Add(@"--exclude-dir=\\System Volume Information$");
         startInfo.ArgumentList.Add(@"--exclude-dir=\\$Recycle\.Bin$");
-        foreach (var target in targets)
+        if (fileListPath is not null)
         {
-            startInfo.ArgumentList.Add(target);
+            startInfo.ArgumentList.Add($"--file-list={fileListPath}");
+        }
+        else
+        {
+            foreach (var target in targets)
+            {
+                startInfo.ArgumentList.Add(target);
+            }
         }
 
         return startInfo;

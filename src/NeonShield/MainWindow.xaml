@@ -629,7 +629,7 @@
                                     <CheckBox x:Name="OnlineReputationCheckBox" Content="VirusTotal-Hashabgleich aktivieren" Foreground="#D7CEDC"/>
                                     <TextBlock Text="Persönlicher VirusTotal API-Schlüssel" Foreground="#9B90A2" FontSize="10" Margin="0,16,0,7"/>
                                     <PasswordBox x:Name="VirusTotalApiKeyBox" Background="#130D1D" Foreground="White" BorderBrush="#4D345E" BorderThickness="1" Padding="14,11"/>
-                                    <TextBlock Text="Der Schlüssel wird mit dem Windows-Benutzerkonto verschlüsselt gespeichert. Öffentliche API-Limits können den Scan verlangsamen." Foreground="#706675" FontSize="10" Margin="0,9,0,0" TextWrapping="Wrap"/>
+                                    <TextBlock Text="Der Schlüssel wird mit dem Windows-Benutzerkonto verschlüsselt gespeichert. Die kostenlose API ist nur für persönliche, nicht kommerzielle Nutzung vorgesehen." Foreground="#706675" FontSize="10" Margin="0,9,0,0" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 

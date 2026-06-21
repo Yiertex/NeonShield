@@ -131,17 +131,29 @@ public sealed class EngineManagerService
         return dataDirectory;
     }
 
+    public static string GetCvdCertificateDirectory()
+    {
+        var certificateDirectory = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "NeonShield",
+            "CvdCerts");
+        Directory.CreateDirectory(certificateDirectory);
+        return certificateDirectory;
+    }
+
     public static string EnsureFreshClamConfiguration()
     {
         var dataRoot = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "NeonShield");
         var databaseDirectory = GetDatabaseDirectory();
+        var certificateDirectory = GetCvdCertificateDirectory();
         var configPath = Path.Combine(dataRoot, "freshclam.conf");
         Directory.CreateDirectory(dataRoot);
 
         var configuration =
             $"DatabaseDirectory \"{databaseDirectory}\"{Environment.NewLine}" +
+            $"CVDCertsDirectory \"{certificateDirectory}\"{Environment.NewLine}" +
             $"DatabaseMirror database.clamav.net{Environment.NewLine}" +
             $"Checks 12{Environment.NewLine}" +
             $"ReceiveTimeout 300{Environment.NewLine}" +
@@ -310,6 +322,7 @@ public sealed class EngineManagerService
     private static void EnsureDataDirectories()
     {
         GetDatabaseDirectory();
+        GetCvdCertificateDirectory();
         EnsureFreshClamConfiguration();
     }
 

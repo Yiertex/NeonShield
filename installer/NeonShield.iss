@@ -1,5 +1,7 @@
 #define AppName "NeonShield"
-#define AppVersion "1.1.0"
+#ifndef AppVersion
+  #define AppVersion "1.2.0"
+#endif
 #define AppPublisher "Yiertex"
 #define AppExeName "NeonShield.exe"
 
@@ -29,7 +31,7 @@ SetupLogging=yes
 Name: "german"; MessagesFile: "compiler:Languages\German.isl"
 
 [Files]
-Source: "..\release\win-x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\release\win-x64\*"; DestDir: "{app}"; Excludes: "*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#AppName}"; Filename: "{app}\{#AppExeName}"
@@ -45,6 +47,7 @@ Filename: "{app}\{#AppExeName}"; Description: "{#AppName} starten"; Flags: nowai
 Type: filesandordirs; Name: "{app}\Engine"
 Type: filesandordirs; Name: "{app}\Engine.previous"
 Type: filesandordirs; Name: "{localappdata}\NeonShield\Database"
+Type: filesandordirs; Name: "{localappdata}\NeonShield\CvdCerts"
 Type: files; Name: "{localappdata}\NeonShield\freshclam.conf"
 Type: files; Name: "{localappdata}\NeonShield\engine-install.log"
 
