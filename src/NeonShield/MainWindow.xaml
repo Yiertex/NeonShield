@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="NeonShield"
+        Icon="Assets/NeonShield.ico"
         Width="1280" Height="820" MinWidth="1120" MinHeight="720"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen">
@@ -25,7 +26,7 @@
             <Grid Grid.ColumnSpan="2" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <Border Background="#0E0916" CornerRadius="18,18,0,0"/>
                 <StackPanel Orientation="Horizontal" Margin="22,0,0,0" VerticalAlignment="Center">
-                    <Border Width="12" Height="12" CornerRadius="6" Background="{StaticResource NeonGradient}" Effect="{StaticResource NeonShadow}"/>
+                    <Image Source="Assets/NeonShield.ico" Width="24" Height="24" Stretch="Uniform"/>
                     <TextBlock Text="N E O N S H I E L D" Foreground="White" FontSize="12" FontWeight="Bold" Margin="10,0,0,0"/>
                     <TextBlock Text="  /  SECURITY CONSOLE" Foreground="#675D70" FontSize="11" Margin="6,0,0,0"/>
                 </StackPanel>

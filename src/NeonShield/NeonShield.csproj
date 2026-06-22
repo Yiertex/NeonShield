@@ -11,6 +11,7 @@
     <AssemblyName>NeonShield</AssemblyName>
     <RootNamespace>NeonShield</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\NeonShield.ico</ApplicationIcon>
     <Version>1.5.2</Version>
     <AssemblyVersion>1.5.2.0</AssemblyVersion>
     <FileVersion>1.5.2.0</FileVersion>
@@ -23,5 +24,9 @@
     <Description>NeonShield Antivirus mit ClamAV-Engine, Tiefenscan und Quarantaene.</Description>
     <DefaultItemExcludes>$(DefaultItemExcludes);bin\**;obj\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\NeonShield.ico" />
+  </ItemGroup>
 
 </Project>
