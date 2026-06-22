@@ -18,6 +18,7 @@ Virensignaturen bereit, sondern startet die lokal installierten Programme
 - optionaler VirusTotal-Hashabgleich ohne Datei-Upload
 - Automatische Quarantäne mit Wiederherstellen und endgültigem Löschen
 - Aktualisierung der ClamAV-Signaturen über `freshclam`
+- stabiler GitHub-Updatekanal für NeonShield mit SHA-256-Prüfung
 - Dunkle, violette Neon-Oberfläche
 
 ## Voraussetzungen
@@ -61,19 +62,31 @@ Windows-Installer automatisch:
 
 - bei Änderungen auf `main`,
 - manuell über **Actions → Build Windows installer → Run workflow**,
-- beim Push eines Versionstags wie `v1.5.2`.
+- beim Push eines Versionstags wie `v1.6.0`.
 
 Bei einem normalen Build kann die Setup-EXE auf der Seite des Workflow-Laufs
 unter **Artifacts** heruntergeladen werden. Ein Versionstag erzeugt zusätzlich
-automatisch ein GitHub-Prerelease und hängt die Setup-EXE inklusive
+automatisch ein stabiles GitHub Release und hängt die Setup-EXE inklusive
 SHA-256-Prüfsumme an.
 
 Beispiel für eine Veröffentlichung über GitHub Desktop:
 
 1. Änderungen committen und pushen.
 2. In GitHub Desktop **Repository → Open in Terminal** öffnen.
-3. `git tag v1.5.2` ausführen.
-4. `git push origin v1.5.2` ausführen.
+3. `git tag v1.6.0` ausführen.
+4. `git push origin v1.6.0` ausführen.
+
+### Updatekanal für installierte Versionen
+
+NeonShield fragt beim Start die GitHub-Release-API nach dem neuesten stabilen
+Release ab. Unter **Einstellungen → NeonShield Updates** kann die Prüfung auch
+manuell gestartet oder für den Programmstart deaktiviert werden. Vor dem Start
+eines heruntergeladenen Installers wird dessen veröffentlichte
+SHA-256-Prüfsumme kontrolliert.
+
+Der Updatekanal funktioniert ohne eingebauten Zugangsschlüssel. Dafür müssen
+das Repository `Yiertex/NeonShield` und das jeweilige GitHub Release öffentlich
+erreichbar sein. Entwürfe und Prereleases werden vom stabilen Kanal ignoriert.
 
 Während der Installation:
 
@@ -113,6 +126,9 @@ C:\Program Files\ClamAV
   wiederherstellen, die nachweislich ein Fehlalarm sind.
 - Ein kompletter Tiefenscan kann lange dauern und auf geschützte Windows-
   Ordner ohne Administratorrechte nicht zugreifen.
+- Dateien, die von Windows oder einer anderen Sicherheitssoftware exklusiv
+  gesperrt sind, werden als „übersprungen“ protokolliert und gelten nicht
+  automatisch als Scanfehler.
 - Für aussagekräftige Ergebnisse müssen die ClamAV-Signaturen aktuell sein.
 - Der optionale VirusTotal-Abgleich überträgt SHA-256-Hashes und ist
   standardmäßig deaktiviert. Beachte die Einschränkungen der VirusTotal

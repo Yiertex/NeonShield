@@ -8,4 +8,5 @@ public sealed class AppSettings
     public bool ScanPotentiallyUnwanted { get; set; } = true;
     public bool EnableOnlineReputation { get; set; }
     public string VirusTotalApiKeyProtected { get; set; } = string.Empty;
+    public bool CheckApplicationUpdatesOnStartup { get; set; } = true;
 }

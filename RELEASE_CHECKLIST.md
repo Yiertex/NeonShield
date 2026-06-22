@@ -12,25 +12,27 @@
 - [ ] Prozess-Scan wurde mit deaktiviertem und aktiviertem Online-Abgleich getestet.
 - [ ] Installation und Deinstallation wurden auf einem sauberen Windows-Konto getestet.
 - [ ] ClamAV-Engine und Signaturen werden installiert und wieder entfernt.
+- [ ] Manuelle und automatische NeonShield-Updateprüfung wurden getestet.
 - [ ] Keine API-Schlüssel, Signaturdatenbanken oder Quarantänedateien sind im Commit.
 
 ## Veröffentlichung
 
 ```powershell
-git tag v1.5.2
-git push origin v1.5.2
+git tag v1.6.0
+git push origin v1.6.0
 ```
 
 Danach unter **GitHub → Actions** prüfen:
 
 - [ ] Build ist grün.
 - [ ] Installer-Artefakt ist vorhanden.
-- [ ] GitHub-Prerelease enthält die Setup-EXE.
+- [ ] Das stabile GitHub Release ist als „Latest“ markiert.
+- [ ] Das Release enthält die Setup-EXE.
 - [ ] SHA-256 im Release stimmt mit der hochgeladenen Datei überein.
 
 ## Nach der Veröffentlichung
 
 - [ ] Installer auf einem zweiten Windows-System herunterladen und ausführen.
 - [ ] Windows-SmartScreen-Verhalten dokumentieren.
-- [ ] Release zunächst als Beta/Prerelease belassen.
-- [ ] Erst nach Rückmeldungen und Tests als stabil markieren.
+- [ ] Eine ältere NeonShield-Version erkennt `v1.6.0` über den Updatekanal.
+- [ ] Der heruntergeladene Installer startet erst nach erfolgreicher SHA-256-Prüfung.

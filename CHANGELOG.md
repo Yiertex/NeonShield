@@ -2,6 +2,21 @@
 
 Alle wichtigen Änderungen an NeonShield werden in dieser Datei dokumentiert.
 
+## [1.6.0] - 2026-06-22
+
+### Hinzugefügt
+
+- stabiler GitHub-Updatekanal mit Prüfung beim Programmstart
+- manuelle Updateprüfung in den Einstellungen
+- SHA-256-Verifikation vor dem Start heruntergeladener Installer
+- eigene Zählung für gesperrte oder unzugängliche Dateien in Scanberichten
+
+### Geändert
+
+- GitHub-Tags erzeugen stabile Releases für den Anwendungskanal
+- ClamAV-Zugriffswarnungen werden kompakt als übersprungene Dateien dargestellt
+- alte Scanberichte mit reinen Zugriffswarnungen werden beim Laden normalisiert
+
 ## [1.5.2] - 2026-06-21
 
 ### Hinzugefügt

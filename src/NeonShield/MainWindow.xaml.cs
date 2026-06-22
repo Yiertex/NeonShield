@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly ScanHistoryService _scanHistoryService = new();
     private readonly ClamAvService _clamAvService = new();
     private readonly EngineManagerService _engineManager = new();
+    private readonly ApplicationUpdateService _applicationUpdateService = new();
     private readonly VirusTotalService _virusTotalService = new();
     private readonly AsyncPauseGate _pauseGate = new();
     private readonly DispatcherTimer _scanTimer;
@@ -27,6 +28,7 @@ public partial class MainWindow : Window
     private string? _clamAvDirectory;
     private long _lastFilesScanned;
     private bool _isUpdating;
+    private bool _isCheckingApplicationUpdates;
     private bool _isScanPaused;
     private DateTimeOffset? _pauseStartedAt;
     private TimeSpan _totalPausedDuration;
@@ -49,6 +51,9 @@ public partial class MainWindow : Window
         ScanArchivesCheckBox.IsChecked = _settings.ScanArchives;
         ScanPuaCheckBox.IsChecked = _settings.ScanPotentiallyUnwanted;
         OnlineReputationCheckBox.IsChecked = _settings.EnableOnlineReputation;
+        ApplicationUpdateOnStartupCheckBox.IsChecked = _settings.CheckApplicationUpdatesOnStartup;
+        ApplicationVersionText.Text =
+            $"Installierte Version: {_applicationUpdateService.CurrentVersion} · Kanal: Stabil";
         VirusTotalApiKeyBox.Password =
             SecretProtectionService.Unprotect(_settings.VirusTotalApiKeyProtected);
 
@@ -61,6 +66,10 @@ public partial class MainWindow : Window
         else
         {
             await CheckForUpdatesAsync();
+            if (_settings.CheckApplicationUpdatesOnStartup)
+            {
+                await CheckForApplicationUpdatesAsync(userInitiated: false);
+            }
         }
     }
 
@@ -327,7 +336,7 @@ public partial class MainWindow : Window
             var quarantinedCount = 0;
             if (_settings.AutoQuarantine &&
                 !result.WasCancelled &&
-                result.ExitCode <= 1 &&
+                !result.HasFatalError &&
                 kind is ScanKind.Quick or ScanKind.Deep or ScanKind.Custom)
             {
                 foreach (var threat in result.Threats)
@@ -353,7 +362,9 @@ public partial class MainWindow : Window
             }
 
             report.FilesScanned = result.FilesScanned;
+            report.SkippedFiles = result.SkippedFiles;
             report.Threats = result.Threats;
+            report.Warnings = result.Warnings;
             report.Errors = result.Errors;
             report.QuarantinedCount = quarantinedCount;
             report.QuarantineFailures = quarantineFailures;
@@ -364,7 +375,7 @@ public partial class MainWindow : Window
                 _settings.EnableOnlineReputation &&
                 !string.IsNullOrWhiteSpace(apiKey) &&
                 !result.WasCancelled &&
-                result.ExitCode <= 1)
+                !result.HasFatalError)
             {
                 ScanStatusTitle.Text = "Online-Reputation wird geprüft";
                 ScanStatusSubtitle.Text = "Es werden ausschließlich SHA-256-Hashes an VirusTotal übertragen.";
@@ -379,7 +390,7 @@ public partial class MainWindow : Window
             _lastFilesScanned = result.FilesScanned;
             report.Status = result.WasCancelled
                 ? ScanReportStatus.Cancelled
-                : result.ExitCode > 1
+                : result.HasFatalError
                     ? ScanReportStatus.Failed
                     : ScanReportStatus.Completed;
             report.FinishedAt = DateTimeOffset.Now;
@@ -451,7 +462,7 @@ public partial class MainWindow : Window
             ScanStatusTitle.Text = "Scan abgebrochen";
             ScanStatusSubtitle.Text = $"{result.FilesScanned:N0} Dateien wurden bis zum Abbruch geprüft.";
         }
-        else if (result.ExitCode > 1)
+        else if (result.HasFatalError)
         {
             ScanStatusTitle.Text = "Scan fehlgeschlagen";
             ScanStatusSubtitle.Text = result.Errors.LastOrDefault()
@@ -478,9 +489,16 @@ public partial class MainWindow : Window
                 : "Prüfe die Scanergebnisse und aktiviere bei Bedarf die automatische Quarantäne.";
         }
 
-        if (result.Errors.Count > 0 || quarantineFailures.Count > 0)
+        if (!result.HasFatalError && result.SkippedFiles > 0)
         {
-            ScanStatusSubtitle.Text += $" {result.Errors.Count + quarantineFailures.Count} Hinweis(e) wurden protokolliert.";
+            ScanStatusSubtitle.Text +=
+                $" {result.SkippedFiles:N0} gesperrte oder geschützte Datei(en) wurden übersprungen.";
+        }
+
+        if (result.Warnings.Count > 0 || result.Errors.Count > 0 || quarantineFailures.Count > 0)
+        {
+            ScanStatusSubtitle.Text +=
+                $" {result.Warnings.Count + result.Errors.Count + quarantineFailures.Count} Hinweis(e) wurden protokolliert.";
         }
     }
 
@@ -494,6 +512,8 @@ public partial class MainWindow : Window
         SettingsNav.IsEnabled = !isScanning && !_isUpdating;
         QuickScanDashboardButton.IsEnabled = !isScanning && !_isUpdating && _clamAvDirectory is not null;
         UpdateButton.IsEnabled = !isScanning && !_isUpdating;
+        ApplicationUpdateButton.IsEnabled =
+            !isScanning && !_isUpdating && !_isCheckingApplicationUpdates;
     }
 
     private void PauseScan_Click(object sender, RoutedEventArgs e)
@@ -615,6 +635,106 @@ public partial class MainWindow : Window
     private async void UpdateSignatures_Click(object sender, RoutedEventArgs e)
     {
         await CheckForUpdatesAsync();
+    }
+
+    private async void CheckApplicationUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        await CheckForApplicationUpdatesAsync(userInitiated: true);
+    }
+
+    private async Task CheckForApplicationUpdatesAsync(bool userInitiated)
+    {
+        if (_isCheckingApplicationUpdates || _scanCancellation is not null)
+        {
+            return;
+        }
+
+        _isCheckingApplicationUpdates = true;
+        ApplicationUpdateButton.IsEnabled = false;
+        ApplicationUpdateStatusText.Foreground =
+            new SolidColorBrush(Color.FromRgb(155, 144, 162));
+        ApplicationUpdateStatusText.Text = "GitHub-Releasekanal wird geprüft …";
+
+        try
+        {
+            var update = await _applicationUpdateService.CheckForUpdateAsync(
+                CancellationToken.None);
+            if (update is null)
+            {
+                ApplicationUpdateStatusText.Foreground =
+                    new SolidColorBrush(Color.FromRgb(98, 233, 189));
+                ApplicationUpdateStatusText.Text =
+                    $"Version {_applicationUpdateService.CurrentVersion} ist aktuell.";
+                if (userInitiated)
+                {
+                    ShowMessage("NeonShield ist bereits auf dem neuesten Stand.", isError: false);
+                }
+
+                return;
+            }
+
+            ApplicationUpdateStatusText.Foreground =
+                new SolidColorBrush(Color.FromRgb(210, 100, 255));
+            ApplicationUpdateStatusText.Text =
+                $"Version {update.LatestVersion} ist verfügbar.";
+
+            var answer = MessageBox.Show(
+                this,
+                $"NeonShield {update.LatestVersion} ist verfügbar.\n\n" +
+                $"Installiert: {update.CurrentVersion}\n" +
+                $"Neu: {update.LatestVersion}\n\n" +
+                "Soll der geprüfte Installer jetzt heruntergeladen und gestartet werden?",
+                "NeonShield Update",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Information);
+            if (answer != MessageBoxResult.Yes)
+            {
+                ApplicationUpdateStatusText.Text =
+                    $"Version {update.LatestVersion} ist verfügbar und wurde noch nicht installiert.";
+                return;
+            }
+
+            var progress = new Progress<int>(percentage =>
+            {
+                ApplicationUpdateStatusText.Text =
+                    $"Installer wird heruntergeladen … {percentage}%";
+            });
+            var installerPath = await _applicationUpdateService.DownloadInstallerAsync(
+                update,
+                progress,
+                CancellationToken.None);
+
+            ApplicationUpdateStatusText.Foreground =
+                new SolidColorBrush(Color.FromRgb(98, 233, 189));
+            ApplicationUpdateStatusText.Text =
+                "Prüfsumme bestätigt. Installer wird gestartet …";
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = installerPath,
+                WorkingDirectory = Path.GetDirectoryName(installerPath)!,
+                UseShellExecute = true
+            });
+            Application.Current.Shutdown();
+        }
+        catch (Exception ex)
+        {
+            ApplicationUpdateStatusText.Foreground =
+                new SolidColorBrush(Color.FromRgb(255, 106, 141));
+            ApplicationUpdateStatusText.Text =
+                $"Updateprüfung nicht möglich: {Shorten(ex.Message, 120)}";
+            if (userInitiated)
+            {
+                ShowMessage(ex.Message, isError: true);
+            }
+        }
+        finally
+        {
+            _isCheckingApplicationUpdates = false;
+            if (!Application.Current.Dispatcher.HasShutdownStarted)
+            {
+                SetScanningUi(isScanning: false);
+            }
+        }
     }
 
     private async Task CheckForUpdatesAsync()
@@ -752,12 +872,14 @@ public partial class MainWindow : Window
             $"{report.StartedAt.LocalDateTime:dd.MM.yyyy HH:mm:ss} bis {report.FinishedAt.LocalDateTime:HH:mm:ss}";
         ReportStatusText.Text = report.StatusDisplay;
         ReportFilesText.Text = report.FilesScanned.ToString("N0");
+        ReportSkippedText.Text = report.SkippedFiles.ToString("N0");
         ReportThreatsText.Text = report.Threats.Count.ToString("N0");
         ReportQuarantinedText.Text = report.QuarantinedCount.ToString("N0");
         ReportDurationText.Text = report.DurationDisplay;
         ReportThreatList.ItemsSource = report.Threats;
         ReportTargetsList.ItemsSource = report.Targets;
-        ReportErrorsList.ItemsSource = report.Errors
+        ReportErrorsList.ItemsSource = report.Warnings
+            .Concat(report.Errors)
             .Concat(report.QuarantineFailures)
             .DefaultIfEmpty("Keine Hinweise oder Fehler.")
             .ToList();
@@ -915,6 +1037,8 @@ public partial class MainWindow : Window
         _settings.ScanArchives = ScanArchivesCheckBox.IsChecked == true;
         _settings.ScanPotentiallyUnwanted = ScanPuaCheckBox.IsChecked == true;
         _settings.EnableOnlineReputation = OnlineReputationCheckBox.IsChecked == true;
+        _settings.CheckApplicationUpdatesOnStartup =
+            ApplicationUpdateOnStartupCheckBox.IsChecked == true;
         _settings.VirusTotalApiKeyProtected =
             SecretProtectionService.Protect(VirusTotalApiKeyBox.Password);
         await _settingsService.SaveAsync(_settings);

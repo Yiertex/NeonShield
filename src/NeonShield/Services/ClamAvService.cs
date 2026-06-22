@@ -7,6 +7,7 @@ namespace NeonShield.Services;
 
 public sealed class ClamAvService
 {
+    private const int MaximumWarningSamples = 25;
     private Process? _activeProcess;
     private readonly object _processGate = new();
     private bool _isPaused;
@@ -185,9 +186,50 @@ public sealed class ClamAvService
     {
         var startedAt = DateTimeOffset.Now;
         var threats = new List<ThreatDetection>();
+        var warnings = new List<string>();
         var errors = new List<string>();
+        var resultGate = new object();
         long filesScanned = 0;
+        long skippedFiles = 0;
         var exitCode = 0;
+
+        void RecordWarning(string warning)
+        {
+            lock (resultGate)
+            {
+                if (warnings.Count < MaximumWarningSamples)
+                {
+                    warnings.Add(warning);
+                }
+            }
+        }
+
+        void RecordSkippedFile(string line)
+        {
+            Interlocked.Increment(ref skippedFiles);
+            if (TryFormatSkippedFileWarning(line, out var warning))
+            {
+                RecordWarning(warning);
+            }
+        }
+
+        (List<ThreatDetection> Threats, List<string> Warnings, List<string> Errors) Snapshot()
+        {
+            lock (resultGate)
+            {
+                var warningSnapshot = warnings.ToList();
+                var skippedSnapshot = Interlocked.Read(ref skippedFiles);
+                if (skippedSnapshot > 0)
+                {
+                    warningSnapshot.Insert(
+                        0,
+                        $"{skippedSnapshot:N0} Datei(en) wurden übersprungen, weil sie gesperrt waren " +
+                        "oder dem aktuellen Windows-Benutzer der Zugriff fehlte.");
+                }
+
+                return (threats.ToList(), warningSnapshot, errors.ToList());
+            }
+        }
 
         try
         {
@@ -210,7 +252,19 @@ public sealed class ClamAvService
 
                     if (TryParseThreat(line, out var threat))
                     {
-                        threats.Add(threat);
+                        lock (resultGate)
+                        {
+                            threats.Add(threat);
+                        }
+                    }
+
+                    if (TryFormatSkippedFileWarning(line, out _))
+                    {
+                        RecordSkippedFile(line);
+                    }
+                    else if (IsClamAvWarning(line))
+                    {
+                        RecordWarning(line);
                     }
 
                     if (line.EndsWith(" OK", StringComparison.OrdinalIgnoreCase) ||
@@ -220,11 +274,17 @@ public sealed class ClamAvService
                         Interlocked.Increment(ref filesScanned);
                     }
 
+                    int threatCount;
+                    lock (resultGate)
+                    {
+                        threatCount = threats.Count;
+                    }
+
                     progress.Report(new ScanProgress
                     {
                         CurrentPath = ExtractDisplayPath(line, fallbackPath),
                         FilesScanned = Interlocked.Read(ref filesScanned),
-                        ThreatsFound = threats.Count,
+                        ThreatsFound = threatCount,
                         TargetIndex = 1,
                         TargetCount = 1
                     });
@@ -237,7 +297,21 @@ public sealed class ClamAvService
                 {
                     if (!string.IsNullOrWhiteSpace(line))
                     {
-                        errors.Add(line);
+                        if (TryFormatSkippedFileWarning(line, out _))
+                        {
+                            RecordSkippedFile(line);
+                        }
+                        else if (IsClamAvWarning(line))
+                        {
+                            RecordWarning(line);
+                        }
+                        else
+                        {
+                            lock (resultGate)
+                            {
+                                errors.Add(line);
+                            }
+                        }
                     }
                 },
                 cancellationToken);
@@ -246,23 +320,32 @@ public sealed class ClamAvService
             await Task.WhenAll(stdoutTask, stderrTask);
             exitCode = process.ExitCode;
 
-            if (exitCode > 1)
+            lock (resultGate)
             {
-                errors.Add($"ClamAV beendete den Scan mit Code {exitCode}.");
+                if (exitCode > 1 &&
+                    (errors.Count > 0 ||
+                     (warnings.Count == 0 && Interlocked.Read(ref skippedFiles) == 0)))
+                {
+                    errors.Add($"ClamAV beendete den Scan mit Code {exitCode}.");
+                }
             }
         }
         catch (OperationCanceledException)
         {
             TryStopActiveProcess();
+            var cancelledSnapshot = Snapshot();
             return new ScanResult
             {
                 StartedAt = startedAt,
                 FinishedAt = DateTimeOffset.Now,
                 FilesScanned = filesScanned,
-                Threats = threats,
-                Errors = errors,
+                SkippedFiles = (int)Math.Min(Interlocked.Read(ref skippedFiles), int.MaxValue),
+                Threats = cancelledSnapshot.Threats,
+                Warnings = cancelledSnapshot.Warnings,
+                Errors = cancelledSnapshot.Errors,
                 WasCancelled = true,
-                ExitCode = -1
+                ExitCode = -1,
+                HasFatalError = false
             };
         }
         finally
@@ -274,14 +357,18 @@ public sealed class ClamAvService
             }
         }
 
+        var snapshot = Snapshot();
         return new ScanResult
         {
             StartedAt = startedAt,
             FinishedAt = DateTimeOffset.Now,
             FilesScanned = filesScanned,
-            Threats = threats,
-            Errors = errors,
-            ExitCode = exitCode
+            SkippedFiles = (int)Math.Min(Interlocked.Read(ref skippedFiles), int.MaxValue),
+            Threats = snapshot.Threats,
+            Warnings = snapshot.Warnings,
+            Errors = snapshot.Errors,
+            ExitCode = exitCode,
+            HasFatalError = snapshot.Errors.Count > 0
         };
     }
 
@@ -386,6 +473,44 @@ public sealed class ClamAvService
         var separator = line.LastIndexOf(": ", StringComparison.Ordinal);
         return separator > 1 ? line[..separator] : fallback;
     }
+
+    private static bool TryFormatSkippedFileWarning(string line, out string warning)
+    {
+        warning = string.Empty;
+        var markers = new[]
+        {
+            "Can't open file ",
+            "Can't access file ",
+            "Permission denied"
+        };
+
+        foreach (var marker in markers)
+        {
+            var markerIndex = line.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+            if (markerIndex < 0)
+            {
+                continue;
+            }
+
+            var detail = line[(markerIndex + marker.Length)..].Trim();
+            var errorCodeSeparator = detail.LastIndexOf(": ", StringComparison.Ordinal);
+            if (errorCodeSeparator > 2 &&
+                int.TryParse(detail[(errorCodeSeparator + 2)..], out _))
+            {
+                detail = detail[..errorCodeSeparator];
+            }
+
+            warning = string.IsNullOrWhiteSpace(detail)
+                ? "Datei übersprungen: gesperrt oder Zugriff verweigert."
+                : $"Übersprungen (gesperrt oder Zugriff verweigert): {detail}";
+            return true;
+        }
+
+        return false;
+    }
+
+    private static bool IsClamAvWarning(string line) =>
+        line.Contains("Warning:", StringComparison.OrdinalIgnoreCase);
 
     private static async Task<string> RunUtilityAsync(
         string executable,

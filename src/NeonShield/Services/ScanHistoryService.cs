@@ -88,6 +88,7 @@ public sealed class ScanHistoryService
             var reports = await JsonSerializer.DeserializeAsync<List<ScanReport>>(stream, JsonOptions) ?? [];
             foreach (var report in reports)
             {
+                NormalizeFileAccessWarnings(report);
                 if (report.Status == ScanReportStatus.Completed &&
                     report.Errors.Any(error =>
                         error.Contains("Code 2", StringComparison.OrdinalIgnoreCase) ||
@@ -105,6 +106,65 @@ public sealed class ScanHistoryService
         {
             return [];
         }
+    }
+
+    private static void NormalizeFileAccessWarnings(ScanReport report)
+    {
+        var inaccessible = report.Errors
+            .Where(IsFileAccessWarning)
+            .ToList();
+        if (inaccessible.Count == 0)
+        {
+            return;
+        }
+
+        report.Errors.RemoveAll(IsFileAccessWarning);
+        report.SkippedFiles = Math.Max(report.SkippedFiles, inaccessible.Count);
+        if (!report.Warnings.Any(warning =>
+                warning.Contains("wurden übersprungen", StringComparison.OrdinalIgnoreCase)))
+        {
+            report.Warnings.Insert(
+                0,
+                $"{inaccessible.Count:N0} Datei(en) wurden übersprungen, weil sie gesperrt waren " +
+                "oder dem aktuellen Windows-Benutzer der Zugriff fehlte.");
+        }
+
+        foreach (var line in inaccessible.Take(25))
+        {
+            report.Warnings.Add(FormatFileAccessWarning(line));
+        }
+
+        report.Errors.RemoveAll(error =>
+            error.Contains("ClamAV beendete den Scan mit Code 2", StringComparison.OrdinalIgnoreCase));
+        if (report.Status == ScanReportStatus.Failed && report.Errors.Count == 0)
+        {
+            report.Status = ScanReportStatus.Completed;
+        }
+    }
+
+    private static bool IsFileAccessWarning(string line) =>
+        line.Contains("Can't open file ", StringComparison.OrdinalIgnoreCase) ||
+        line.Contains("Can't access file ", StringComparison.OrdinalIgnoreCase) ||
+        line.Contains("Permission denied", StringComparison.OrdinalIgnoreCase);
+
+    private static string FormatFileAccessWarning(string line)
+    {
+        const string openMarker = "Can't open file ";
+        var markerIndex = line.IndexOf(openMarker, StringComparison.OrdinalIgnoreCase);
+        if (markerIndex < 0)
+        {
+            return $"Übersprungen (gesperrt oder Zugriff verweigert): {line}";
+        }
+
+        var detail = line[(markerIndex + openMarker.Length)..].Trim();
+        var errorCodeSeparator = detail.LastIndexOf(": ", StringComparison.Ordinal);
+        if (errorCodeSeparator > 2 &&
+            int.TryParse(detail[(errorCodeSeparator + 2)..], out _))
+        {
+            detail = detail[..errorCodeSeparator];
+        }
+
+        return $"Übersprungen (gesperrt oder Zugriff verweigert): {detail}";
     }
 
     private async Task SaveUnsafeAsync(List<ScanReport> reports)

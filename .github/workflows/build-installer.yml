@@ -133,6 +133,7 @@ jobs:
           files: |
             release-assets/NeonShield-Setup-*.exe
             release-assets/SHA256SUMS.txt
-          prerelease: true
+          prerelease: false
+          make_latest: true
           fail_on_unmatched_files: true
           overwrite_files: true

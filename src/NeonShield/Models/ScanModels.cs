@@ -48,10 +48,13 @@ public sealed class ScanResult
     public DateTimeOffset StartedAt { get; init; }
     public DateTimeOffset FinishedAt { get; init; }
     public long FilesScanned { get; init; }
+    public int SkippedFiles { get; init; }
     public List<ThreatDetection> Threats { get; init; } = [];
+    public List<string> Warnings { get; init; } = [];
     public List<string> Errors { get; init; } = [];
     public bool WasCancelled { get; init; }
     public int ExitCode { get; init; }
+    public bool HasFatalError { get; init; }
 }
 
 public enum ScanReportStatus
@@ -70,8 +73,10 @@ public sealed class ScanReport
     public DateTimeOffset FinishedAt { get; set; }
     public TimeSpan PausedDuration { get; set; }
     public long FilesScanned { get; set; }
+    public int SkippedFiles { get; set; }
     public List<string> Targets { get; set; } = [];
     public List<ThreatDetection> Threats { get; set; } = [];
+    public List<string> Warnings { get; set; } = [];
     public List<string> Errors { get; set; } = [];
     public int QuarantinedCount { get; set; }
     public List<string> QuarantineFailures { get; set; } = [];
@@ -106,8 +111,9 @@ public sealed class ScanReport
         : Duration.ToString(@"mm\:ss");
 
     [JsonIgnore]
-    public string Summary =>
-        $"{FilesScanned:N0} Dateien · {Threats.Count:N0} Funde · {DurationDisplay}";
+    public string Summary => SkippedFiles > 0
+        ? $"{FilesScanned:N0} Dateien · {Threats.Count:N0} Funde · {SkippedFiles:N0} übersprungen · {DurationDisplay}"
+        : $"{FilesScanned:N0} Dateien · {Threats.Count:N0} Funde · {DurationDisplay}";
 }
 
 public sealed class QuarantineRecord
