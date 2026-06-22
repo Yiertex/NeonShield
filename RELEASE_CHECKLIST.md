@@ -18,8 +18,8 @@
 ## Veröffentlichung
 
 ```powershell
-git tag v1.6.0
-git push origin v1.6.0
+git tag v1.7.0
+git push origin v1.7.0
 ```
 
 Danach unter **GitHub → Actions** prüfen:
@@ -34,5 +34,5 @@ Danach unter **GitHub → Actions** prüfen:
 
 - [ ] Installer auf einem zweiten Windows-System herunterladen und ausführen.
 - [ ] Windows-SmartScreen-Verhalten dokumentieren.
-- [ ] Eine ältere NeonShield-Version erkennt `v1.6.0` über den Updatekanal.
+- [ ] Eine ältere NeonShield-Version erkennt `v1.7.0` über den Updatekanal.
 - [ ] Der heruntergeladene Installer startet erst nach erfolgreicher SHA-256-Prüfung.

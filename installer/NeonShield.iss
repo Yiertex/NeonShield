@@ -1,6 +1,6 @@
 #define AppName "NeonShield"
 #ifndef AppVersion
-  #define AppVersion "1.6.0"
+  #define AppVersion "1.7.0"
 #endif
 #define AppPublisher "Yiertex"
 #define AppExeName "NeonShield.exe"

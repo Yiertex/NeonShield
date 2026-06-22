@@ -20,8 +20,8 @@ Windows-Benutzerkonto gebunden verschlüsselt.
 
 NeonShield greift auf folgende Dienste zu:
 
-- GitHub API und GitHub Releases, um offizielle ClamAV-Versionen zu prüfen und
-  herunterzuladen,
+- GitHub API und GitHub Releases, um offizielle ClamAV-Versionen sowie
+  NeonShield-Updates zu prüfen und herunterzuladen,
 - `database.clamav.net`, um ClamAV-Signaturen mit `freshclam` zu aktualisieren,
 - optional `www.virustotal.com`, wenn der Benutzer den
   VirusTotal-Hashabgleich ausdrücklich aktiviert.

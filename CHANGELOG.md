@@ -2,6 +2,15 @@
 
 Alle wichtigen Änderungen an NeonShield werden in dieser Datei dokumentiert.
 
+## [1.7.0] - 2026-06-22
+
+### Hinzugefügt
+
+- aufklappbarer Info-Bereich in den Einstellungen
+- Anzeige von Autor Yiertex, App-Version, Updatekanal und ClamAV-Version
+- eingebetteter Changelog direkt in der Anwendung
+- Schnelllinks zu GitHub, Releases, Lizenz und Datenschutz
+
 ## [1.6.0] - 2026-06-22
 
 ### Hinzugefügt

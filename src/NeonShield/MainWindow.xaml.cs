@@ -54,6 +54,8 @@ public partial class MainWindow : Window
         ApplicationUpdateOnStartupCheckBox.IsChecked = _settings.CheckApplicationUpdatesOnStartup;
         ApplicationVersionText.Text =
             $"Installierte Version: {_applicationUpdateService.CurrentVersion} · Kanal: Stabil";
+        AboutVersionText.Text = _applicationUpdateService.CurrentVersion;
+        AboutChangelogTextBox.Text = ChangelogService.LoadDisplayText();
         VirusTotalApiKeyBox.Password =
             SecretProtectionService.Unprotect(_settings.VirusTotalApiKeyProtected);
 
@@ -191,6 +193,7 @@ public partial class MainWindow : Window
         HeaderStatusDot.Fill = brush;
         EngineStatusText.Text = title;
         EngineVersionText.Text = subtitle;
+        AboutEngineVersionText.Text = subtitle;
         HeaderStatusText.Text = connected ? "Schutz aktiv" : "Einrichtung erforderlich";
     }
 
@@ -1046,6 +1049,32 @@ public partial class MainWindow : Window
         SettingsFeedbackText.Foreground = new SolidColorBrush(Color.FromRgb(98, 233, 189));
         SettingsFeedbackText.Text = "Gespeichert.";
         await DetectEngineAsync();
+    }
+
+    private void ToggleInfoTray_Click(object sender, RoutedEventArgs e)
+    {
+        var shouldOpen = InfoTrayPanel.Visibility != Visibility.Visible;
+        InfoTrayPanel.Visibility = shouldOpen ? Visibility.Visible : Visibility.Collapsed;
+        InfoTrayToggleButton.Content = shouldOpen ? "Info schließen" : "Info anzeigen";
+    }
+
+    private void OpenInfoLink_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button { Tag: string target } ||
+            !Uri.TryCreate(target, UriKind.Absolute, out var uri) ||
+            !uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) ||
+            !uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase) ||
+            !uri.AbsolutePath.StartsWith("/Yiertex/NeonShield", StringComparison.OrdinalIgnoreCase))
+        {
+            ShowMessage("Der Informationslink ist ungültig.", isError: true);
+            return;
+        }
+
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = uri.AbsoluteUri,
+            UseShellExecute = true
+        });
     }
 
     private static string Shorten(string value, int maxLength)

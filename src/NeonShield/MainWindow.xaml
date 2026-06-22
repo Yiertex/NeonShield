@@ -662,6 +662,84 @@
                                 </StackPanel>
                             </Border>
 
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,18">
+                                <StackPanel>
+                                    <Grid>
+                                        <StackPanel>
+                                            <TextBlock Text="Info &amp; Changelog" Foreground="White" FontSize="18" FontWeight="SemiBold"/>
+                                            <TextBlock Text="Programm-, Herausgeber- und Versionsinformationen"
+                                                       Foreground="{StaticResource MutedBrush}" FontSize="11" Margin="0,7,0,0"/>
+                                        </StackPanel>
+                                        <Button x:Name="InfoTrayToggleButton" Style="{StaticResource SecondaryButton}"
+                                                Content="Info anzeigen" HorizontalAlignment="Right"
+                                                Click="ToggleInfoTray_Click"/>
+                                    </Grid>
+
+                                    <Border x:Name="InfoTrayPanel" Visibility="Collapsed"
+                                            Background="#100B17" BorderBrush="#422B52" BorderThickness="1"
+                                            CornerRadius="14" Padding="18" Margin="0,18,0,0">
+                                        <StackPanel>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="145"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <TextBlock Text="Produkt" Foreground="#776C7E" FontSize="10" FontWeight="Bold"/>
+                                                <TextBlock Grid.Column="1" Text="NeonShield Antivirus" Foreground="White" FontSize="12"/>
+                                                <TextBlock Grid.Row="1" Text="Autor &amp; Publisher" Foreground="#776C7E" FontSize="10" FontWeight="Bold" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="Yiertex" Foreground="#D264FF" FontSize="12" FontWeight="SemiBold" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="2" Text="Version" Foreground="#776C7E" FontSize="10" FontWeight="Bold" Margin="0,11,0,0"/>
+                                                <TextBlock x:Name="AboutVersionText" Grid.Row="2" Grid.Column="1" Foreground="White" FontSize="12" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="3" Text="Updatekanal" Foreground="#776C7E" FontSize="10" FontWeight="Bold" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="3" Grid.Column="1" Text="Stabil · GitHub Releases · SHA-256 geprüft" Foreground="#62E9BD" FontSize="12" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="4" Text="ClamAV Engine" Foreground="#776C7E" FontSize="10" FontWeight="Bold" Margin="0,11,0,0"/>
+                                                <TextBlock x:Name="AboutEngineVersionText" Grid.Row="4" Grid.Column="1" Text="Wird erkannt …"
+                                                           Foreground="#CFC6D5" FontSize="12" Margin="0,11,0,0" TextWrapping="Wrap"/>
+                                                <TextBlock Grid.Row="5" Text="Lizenz" Foreground="#776C7E" FontSize="10" FontWeight="Bold" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="5" Grid.Column="1" Text="MIT · ClamAV separat unter GPL v2"
+                                                           Foreground="#CFC6D5" FontSize="12" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="6" Text="Copyright" Foreground="#776C7E" FontSize="10" FontWeight="Bold" Margin="0,11,0,0"/>
+                                                <TextBlock Grid.Row="6" Grid.Column="1" Text="© 2026 Yiertex"
+                                                           Foreground="#CFC6D5" FontSize="12" Margin="0,11,0,0"/>
+                                            </Grid>
+
+                                            <WrapPanel Margin="0,20,0,0">
+                                                <Button Style="{StaticResource SecondaryButton}" Content="GitHub"
+                                                        Tag="https://github.com/Yiertex/NeonShield" Click="OpenInfoLink_Click"/>
+                                                <Button Style="{StaticResource SecondaryButton}" Content="Releases" Margin="10,0,0,0"
+                                                        Tag="https://github.com/Yiertex/NeonShield/releases" Click="OpenInfoLink_Click"/>
+                                                <Button Style="{StaticResource SecondaryButton}" Content="Lizenz" Margin="10,0,0,0"
+                                                        Tag="https://github.com/Yiertex/NeonShield/blob/main/LICENSE" Click="OpenInfoLink_Click"/>
+                                                <Button Style="{StaticResource SecondaryButton}" Content="Datenschutz" Margin="10,0,0,0"
+                                                        Tag="https://github.com/Yiertex/NeonShield/blob/main/PRIVACY.md" Click="OpenInfoLink_Click"/>
+                                            </WrapPanel>
+
+                                            <TextBlock Text="Änderungsverlauf" Foreground="White" FontSize="15"
+                                                       FontWeight="SemiBold" Margin="0,22,0,10"/>
+                                            <TextBox x:Name="AboutChangelogTextBox" Height="250"
+                                                     IsReadOnly="True" AcceptsReturn="True"
+                                                     TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                                                     HorizontalScrollBarVisibility="Disabled"
+                                                     Background="#0B0710" Foreground="#CFC6D5"
+                                                     BorderBrush="#34223F" FontFamily="Consolas"
+                                                     FontSize="11" Padding="14"/>
+                                            <TextBlock Text="NeonShield nutzt ClamAV als separate Open-Source-Engine. © 2026 Yiertex."
+                                                       Foreground="#706675" FontSize="10" Margin="0,12,0,0" TextWrapping="Wrap"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
                             <Grid>
                                 <Button Style="{StaticResource PrimaryButton}" Content="Einstellungen speichern" HorizontalAlignment="Left" Click="SaveSettings_Click"/>
                                 <TextBlock x:Name="SettingsFeedbackText" Foreground="#62E9BD" FontSize="12" HorizontalAlignment="Right" VerticalAlignment="Center"/>

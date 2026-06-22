@@ -19,6 +19,7 @@ Virensignaturen bereit, sondern startet die lokal installierten Programme
 - Automatische Quarantäne mit Wiederherstellen und endgültigem Löschen
 - Aktualisierung der ClamAV-Signaturen über `freshclam`
 - stabiler GitHub-Updatekanal für NeonShield mit SHA-256-Prüfung
+- Info- und Changelog-Bereich mit Versions-, Autor- und Engine-Informationen
 - Dunkle, violette Neon-Oberfläche
 
 ## Voraussetzungen
@@ -62,7 +63,7 @@ Windows-Installer automatisch:
 
 - bei Änderungen auf `main`,
 - manuell über **Actions → Build Windows installer → Run workflow**,
-- beim Push eines Versionstags wie `v1.6.0`.
+- beim Push eines Versionstags wie `v1.7.0`.
 
 Bei einem normalen Build kann die Setup-EXE auf der Seite des Workflow-Laufs
 unter **Artifacts** heruntergeladen werden. Ein Versionstag erzeugt zusätzlich
@@ -73,8 +74,8 @@ Beispiel für eine Veröffentlichung über GitHub Desktop:
 
 1. Änderungen committen und pushen.
 2. In GitHub Desktop **Repository → Open in Terminal** öffnen.
-3. `git tag v1.6.0` ausführen.
-4. `git push origin v1.6.0` ausführen.
+3. `git tag v1.7.0` ausführen.
+4. `git push origin v1.7.0` ausführen.
 
 ### Updatekanal für installierte Versionen
 
